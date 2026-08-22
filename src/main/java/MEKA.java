@@ -53,6 +53,33 @@ public class MEKA {
                 System.out.println(" OK, I've marked this task as not done yet:");
                 System.out.println("   " + task);
 
+            } else if (command.startsWith("todo ")) {
+                String description = command.substring("todo ".length()).trim();
+                Task task = new Todo(description);
+                tasks[taskCount] = task;
+                taskCount++;
+                printTaskAdded(task, taskCount);
+
+            } else if (command.startsWith("deadline ")) {
+                int byIndex = command.indexOf(" /by ");
+                String description = command.substring("deadline ".length(), byIndex).trim();
+                String by = command.substring(byIndex + " /by ".length()).trim();
+                Task task = new Deadline(description, by);
+                tasks[taskCount] = task;
+                taskCount++;
+                printTaskAdded(task, taskCount);
+
+            } else if (command.startsWith("event ")) {
+                int fromIndex = command.indexOf(" /from ");
+                int toIndex = command.indexOf(" /to ", fromIndex);
+                String description = command.substring("event ".length(), fromIndex).trim();
+                String from = command.substring(fromIndex + " /from ".length(), toIndex).trim();
+                String to = command.substring(toIndex + " /to ".length()).trim();
+                Task task = new Event(description, from, to);
+                tasks[taskCount] = task;
+                taskCount++;
+                printTaskAdded(task, taskCount);
+
             } else {
                 Task t = new Task(command);
                 tasks[taskCount] = t;
@@ -61,5 +88,17 @@ public class MEKA {
             }
             System.out.println(separator);
         }
+    }
+
+    /**
+     * Prints a confirmation after a task has been added to the list.
+     *
+     * @param task task that was added
+     * @param taskCount current number of tasks in the list
+     */
+    private static void printTaskAdded(Task task, int taskCount) {
+        System.out.println(" Got it. I've added this task:");
+        System.out.println("   " + task);
+        System.out.println(" Now you have " + taskCount + " tasks in the list.");
     }
 }
