@@ -13,7 +13,7 @@ public class MEKA {
                 + "╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝\n";
 
         String separator = "____________________________________________________________";
-        String[] tasks = new String[100];
+        Task[] tasks = new Task[100];
         int taskCount = 0;
 
         System.out.println(separator);
@@ -38,8 +38,24 @@ public class MEKA {
                 for (int i = 0; i < taskCount; i++) {
                     System.out.println(" " + (i + 1) + ". " + tasks[i]);
                 }
+
+            } else if (command.startsWith("mark ")) {
+                int taskNumber = Integer.parseInt(command.substring(5).trim());
+                Task task = tasks[taskNumber - 1];
+                task.markAsDone();
+                System.out.println(" Nice! I've marked this task as done:");
+                System.out.println("   " + task);
+
+            } else if (command.startsWith("unmark ")) {
+                int taskNumber = Integer.parseInt(command.substring(7).trim());
+                Task task = tasks[taskNumber - 1];
+                task.unmark();
+                System.out.println(" OK, I've marked this task as not done yet:");
+                System.out.println("   " + task);
+
             } else {
-                tasks[taskCount] = command;
+                Task t = new Task(command);
+                tasks[taskCount] = t;
                 taskCount++;
                 System.out.println(" added: " + command);
             }
