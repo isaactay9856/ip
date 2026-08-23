@@ -62,3 +62,140 @@ ____________________________________________________________
  Bye. Hope to see you again soon!
 ____________________________________________________________
 ```
+
+### UI-02: Reject invalid commands without changing task state
+
+- **Aim:** Verify that missing or non-numeric task numbers, empty task descriptions, and unknown commands produce the specified errors. Valid commands are interleaved with invalid commands, and the final list confirms that rejected commands did not add or modify tasks.
+- **Inputs (in order):**
+
+```text
+todo first task
+mark
+todo
+todo second task
+mark one
+mark 1
+unmark
+deadline /by Sunday
+event team sync /from 2pm /to 3pm
+unmark none
+event /from 4pm /to 5pm
+dance
+list
+bye
+```
+
+- **Expected output:**
+
+```text
+____________________________________________________________
+███╗   ███╗███████╗██╗  ██╗ █████╗
+████╗ ████║██╔════╝██║ ██╔╝██╔══██╗
+██╔████╔██║█████╗  █████╔╝ ███████║
+██║╚██╔╝██║██╔══╝  ██╔═██╗ ██╔══██║
+██║ ╚═╝ ██║███████╗██║  ██╗██║  ██║
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
+
+ Hello! I'm MEKA.
+ What can I do for you?
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] first task
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ The following command requires a number to proceed
+____________________________________________________________
+____________________________________________________________
+ The following command requires a task description to proceed
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] second task
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ The following command requires a number to proceed
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [T][X] first task
+____________________________________________________________
+____________________________________________________________
+ The following command requires a number to proceed
+____________________________________________________________
+____________________________________________________________
+ The following command requires a task description to proceed
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [E][ ] team sync (from: 2pm to: 3pm)
+ Now you have 3 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ The following command requires a number to proceed
+____________________________________________________________
+____________________________________________________________
+ The following command requires a task description to proceed
+____________________________________________________________
+____________________________________________________________
+ I do not understand this command. Please input a valid command.
+____________________________________________________________
+____________________________________________________________
+ 1. [T][X] first task
+ 2. [T][ ] second task
+ 3. [E][ ] team sync (from: 2pm to: 3pm)
+____________________________________________________________
+____________________________________________________________
+ Bye. Hope to see you again soon!
+____________________________________________________________
+```
+
+### UI-03: Mark and unmark a valid task
+
+- **Aim:** Verify that valid numeric task references change completion state correctly and that the final task list reflects the latest state.
+- **Inputs (in order):**
+
+```text
+todo reversible task
+mark 1
+unmark 1
+list
+bye
+```
+
+- **Expected output:**
+
+```text
+____________________________________________________________
+███╗   ███╗███████╗██╗  ██╗ █████╗
+████╗ ████║██╔════╝██║ ██╔╝██╔══██╗
+██╔████╔██║█████╗  █████╔╝ ███████║
+██║╚██╔╝██║██╔══╝  ██╔═██╗ ██╔══██║
+██║ ╚═╝ ██║███████╗██║  ██╗██║  ██║
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
+
+ Hello! I'm MEKA.
+ What can I do for you?
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] reversible task
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [T][X] reversible task
+____________________________________________________________
+____________________________________________________________
+ OK, I've marked this task as not done yet:
+   [T][ ] reversible task
+____________________________________________________________
+____________________________________________________________
+ 1. [T][ ] reversible task
+____________________________________________________________
+____________________________________________________________
+ Bye. Hope to see you again soon!
+____________________________________________________________
+```

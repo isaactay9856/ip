@@ -4,6 +4,13 @@ import java.util.Scanner;
  * A simple chatbot that stores tasks, lists them, and exits when the user says goodbye.
  */
 public class MEKA {
+    private static final String NUMBER_REQUIRED_MESSAGE =
+            "The following command requires a number to proceed.";
+    private static final String DESCRIPTION_REQUIRED_MESSAGE =
+            "The following command requires a task description to proceed.";
+    private static final String UNKNOWN_COMMAND_MESSAGE =
+            "I do not understand this command. Please input a valid command.";
+
     public static void main(String[] args) {
         String banner = "███╗   ███╗███████╗██╗  ██╗ █████╗\n"
                 + "████╗ ████║██╔════╝██║ ██╔╝██╔══██╗\n"
@@ -34,59 +41,129 @@ public class MEKA {
             }
 
             System.out.println(separator);
-            if (command.equals("list")) {
-                for (int i = 0; i < taskCount; i++) {
-                    System.out.println(" " + (i + 1) + ". " + tasks[i]);
+            try {
+                if (command.equals("list")) {
+                    for (int i = 0; i < taskCount; i++) {
+                        System.out.println(" " + (i + 1) + ". " + tasks[i]);
+                    }
+
+                } else if (isCommand(command, "mark")) {
+                    int taskNumber = parseTaskNumber(command, "mark");
+                    Task task = tasks[taskNumber - 1];
+                    task.markAsDone();
+                    System.out.println(" Nice! I've marked this task as done:");
+                    System.out.println("   " + task);
+
+                } else if (isCommand(command, "unmark")) {
+                    int taskNumber = parseTaskNumber(command, "unmark");
+                    Task task = tasks[taskNumber - 1];
+                    task.unmark();
+                    System.out.println(" OK, I've marked this task as not done yet:");
+                    System.out.println("   " + task);
+
+                } else if (isCommand(command, "todo")) {
+                    String description = parseDescription(command, "todo");
+                    Task task = new Todo(description);
+                    tasks[taskCount] = task;
+                    taskCount++;
+                    printTaskAdded(task, taskCount);
+
+                } else if (isCommand(command, "deadline")) {
+                    int byIndex = command.indexOf(" /by ");
+                    String description = byIndex < 0
+                            ? parseDescription(command, "deadline")
+                            : command.substring("deadline".length(), byIndex).trim();
+                    requireDescription(description);
+                    if (byIndex < 0) {
+                        throw new MekaException(UNKNOWN_COMMAND_MESSAGE);
+                    }
+                    String by = command.substring(byIndex + " /by ".length()).trim();
+                    Task task = new Deadline(description, by);
+                    tasks[taskCount] = task;
+                    taskCount++;
+                    printTaskAdded(task, taskCount);
+
+                } else if (isCommand(command, "event")) {
+                    int fromIndex = command.indexOf(" /from ");
+                    int toIndex = fromIndex < 0 ? -1 : command.indexOf(" /to ", fromIndex);
+                    String description = fromIndex < 0
+                            ? parseDescription(command, "event")
+                            : command.substring("event".length(), fromIndex).trim();
+                    requireDescription(description);
+                    if (fromIndex < 0 || toIndex < 0) {
+                        throw new MekaException(UNKNOWN_COMMAND_MESSAGE);
+                    }
+                    String from = command.substring(fromIndex + " /from ".length(), toIndex).trim();
+                    String to = command.substring(toIndex + " /to ".length()).trim();
+                    Task task = new Event(description, from, to);
+                    tasks[taskCount] = task;
+                    taskCount++;
+                    printTaskAdded(task, taskCount);
+
+                } else {
+                    throw new MekaException(UNKNOWN_COMMAND_MESSAGE);
                 }
-
-            } else if (command.startsWith("mark ")) {
-                int taskNumber = Integer.parseInt(command.substring(5).trim());
-                Task task = tasks[taskNumber - 1];
-                task.markAsDone();
-                System.out.println(" Nice! I've marked this task as done:");
-                System.out.println("   " + task);
-
-            } else if (command.startsWith("unmark ")) {
-                int taskNumber = Integer.parseInt(command.substring(7).trim());
-                Task task = tasks[taskNumber - 1];
-                task.unmark();
-                System.out.println(" OK, I've marked this task as not done yet:");
-                System.out.println("   " + task);
-
-            } else if (command.startsWith("todo ")) {
-                String description = command.substring("todo ".length()).trim();
-                Task task = new Todo(description);
-                tasks[taskCount] = task;
-                taskCount++;
-                printTaskAdded(task, taskCount);
-
-            } else if (command.startsWith("deadline ")) {
-                int byIndex = command.indexOf(" /by ");
-                String description = command.substring("deadline ".length(), byIndex).trim();
-                String by = command.substring(byIndex + " /by ".length()).trim();
-                Task task = new Deadline(description, by);
-                tasks[taskCount] = task;
-                taskCount++;
-                printTaskAdded(task, taskCount);
-
-            } else if (command.startsWith("event ")) {
-                int fromIndex = command.indexOf(" /from ");
-                int toIndex = command.indexOf(" /to ", fromIndex);
-                String description = command.substring("event ".length(), fromIndex).trim();
-                String from = command.substring(fromIndex + " /from ".length(), toIndex).trim();
-                String to = command.substring(toIndex + " /to ".length()).trim();
-                Task task = new Event(description, from, to);
-                tasks[taskCount] = task;
-                taskCount++;
-                printTaskAdded(task, taskCount);
-
-            } else {
-                Task t = new Task(command);
-                tasks[taskCount] = t;
-                taskCount++;
-                System.out.println(" added: " + command);
+            } catch (MekaException exception) {
+                System.out.println(" " + exception.getMessage());
+            } catch (NumberFormatException exception) {
+                System.out.println(" " + NUMBER_REQUIRED_MESSAGE);
             }
             System.out.println(separator);
+        }
+    }
+
+    /**
+     * Returns whether the input contains the given command word, optionally
+     * followed by arguments.
+     *
+     * @param input complete user input
+     * @param command command word to match
+     * @return true if the input represents the command
+     */
+    private static boolean isCommand(String input, String command) {
+        return input.equals(command) || input.startsWith(command + " ");
+    }
+
+    /**
+     * Extracts a task number from a mark or unmark command.
+     *
+     * @param input complete user input
+     * @param command command word at the start of the input
+     * @return the supplied task number
+     * @throws MekaException if no number was supplied
+     * @throws NumberFormatException if the supplied argument is not a number
+     */
+    private static int parseTaskNumber(String input, String command) throws MekaException {
+        String numberText = input.substring(command.length()).trim();
+        if (numberText.isEmpty()) {
+            throw new MekaException(NUMBER_REQUIRED_MESSAGE);
+        }
+        return Integer.parseInt(numberText);
+    }
+
+    /**
+     * Extracts and validates a task description from a task creation command.
+     *
+     * @param input complete user input
+     * @param command command word at the start of the input
+     * @return the non-empty task description
+     * @throws MekaException if the description is empty
+     */
+    private static String parseDescription(String input, String command) throws MekaException {
+        String description = input.substring(command.length()).trim();
+        requireDescription(description);
+        return description;
+    }
+
+    /**
+     * Ensures a task description contains visible characters.
+     *
+     * @param description task description to validate
+     * @throws MekaException if the description is empty
+     */
+    private static void requireDescription(String description) throws MekaException {
+        if (description.isEmpty()) {
+            throw new MekaException(DESCRIPTION_REQUIRED_MESSAGE);
         }
     }
 
