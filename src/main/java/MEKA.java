@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -8,6 +9,8 @@ public class MEKA {
             "The following command requires a number to proceed.";
     private static final String DESCRIPTION_REQUIRED_MESSAGE =
             "The following command requires a task description to proceed.";
+    private static final String INVALID_TASK_NUMBER_MESSAGE =
+            "The task number does not exist in the list.";
     private static final String UNKNOWN_COMMAND_MESSAGE =
             "I do not understand this command. Please input a valid command.";
 
@@ -20,8 +23,7 @@ public class MEKA {
                 + "╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝\n";
 
         String separator = "____________________________________________________________";
-        Task[] tasks = new Task[100];
-        int taskCount = 0;
+        ArrayList<Task> tasks = new ArrayList<>();
 
         System.out.println(separator);
         System.out.println(banner);
@@ -43,30 +45,36 @@ public class MEKA {
             System.out.println(separator);
             try {
                 if (command.equals("list")) {
-                    for (int i = 0; i < taskCount; i++) {
-                        System.out.println(" " + (i + 1) + ". " + tasks[i]);
+                    for (int i = 0; i < tasks.size(); i++) {
+                        System.out.println(" " + (i + 1) + ". " + tasks.get(i));
                     }
 
                 } else if (isCommand(command, "mark")) {
                     int taskNumber = parseTaskNumber(command, "mark");
-                    Task task = tasks[taskNumber - 1];
+                    Task task = tasks.get(taskNumber - 1);
                     task.markAsDone();
                     System.out.println(" Nice! I've marked this task as done:");
                     System.out.println("   " + task);
 
                 } else if (isCommand(command, "unmark")) {
                     int taskNumber = parseTaskNumber(command, "unmark");
-                    Task task = tasks[taskNumber - 1];
+                    Task task = tasks.get(taskNumber - 1);
                     task.unmark();
                     System.out.println(" OK, I've marked this task as not done yet:");
                     System.out.println("   " + task);
 
+                } else if (isCommand(command, "delete")) {
+                    int taskNumber = parseTaskNumber(command, "delete");
+                    Task task = tasks.remove(taskNumber - 1);
+                    System.out.println(" Noted. I've removed this task:");
+                    System.out.println("   " + task);
+                    System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+
                 } else if (isCommand(command, "todo")) {
                     String description = parseDescription(command, "todo");
                     Task task = new Todo(description);
-                    tasks[taskCount] = task;
-                    taskCount++;
-                    printTaskAdded(task, taskCount);
+                    tasks.add(task);
+                    printTaskAdded(task, tasks.size());
 
                 } else if (isCommand(command, "deadline")) {
                     int byIndex = command.indexOf(" /by ");
@@ -79,9 +87,8 @@ public class MEKA {
                     }
                     String by = command.substring(byIndex + " /by ".length()).trim();
                     Task task = new Deadline(description, by);
-                    tasks[taskCount] = task;
-                    taskCount++;
-                    printTaskAdded(task, taskCount);
+                    tasks.add(task);
+                    printTaskAdded(task, tasks.size());
 
                 } else if (isCommand(command, "event")) {
                     int fromIndex = command.indexOf(" /from ");
@@ -96,9 +103,8 @@ public class MEKA {
                     String from = command.substring(fromIndex + " /from ".length(), toIndex).trim();
                     String to = command.substring(toIndex + " /to ".length()).trim();
                     Task task = new Event(description, from, to);
-                    tasks[taskCount] = task;
-                    taskCount++;
-                    printTaskAdded(task, taskCount);
+                    tasks.add(task);
+                    printTaskAdded(task, tasks.size());
 
                 } else {
                     throw new MekaException(UNKNOWN_COMMAND_MESSAGE);
@@ -107,6 +113,8 @@ public class MEKA {
                 System.out.println(" " + exception.getMessage());
             } catch (NumberFormatException exception) {
                 System.out.println(" " + NUMBER_REQUIRED_MESSAGE);
+            } catch (IndexOutOfBoundsException exception) {
+                System.out.println(" " + INVALID_TASK_NUMBER_MESSAGE);
             }
             System.out.println(separator);
         }

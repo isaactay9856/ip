@@ -105,10 +105,10 @@ ____________________________________________________________
  Now you have 1 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
- The following command requires a number to proceed
+ The following command requires a number to proceed.
 ____________________________________________________________
 ____________________________________________________________
- The following command requires a task description to proceed
+ The following command requires a task description to proceed.
 ____________________________________________________________
 ____________________________________________________________
  Got it. I've added this task:
@@ -116,17 +116,17 @@ ____________________________________________________________
  Now you have 2 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
- The following command requires a number to proceed
+ The following command requires a number to proceed.
 ____________________________________________________________
 ____________________________________________________________
  Nice! I've marked this task as done:
    [T][X] first task
 ____________________________________________________________
 ____________________________________________________________
- The following command requires a number to proceed
+ The following command requires a number to proceed.
 ____________________________________________________________
 ____________________________________________________________
- The following command requires a task description to proceed
+ The following command requires a task description to proceed.
 ____________________________________________________________
 ____________________________________________________________
  Got it. I've added this task:
@@ -134,10 +134,10 @@ ____________________________________________________________
  Now you have 3 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
- The following command requires a number to proceed
+ The following command requires a number to proceed.
 ____________________________________________________________
 ____________________________________________________________
- The following command requires a task description to proceed
+ The following command requires a task description to proceed.
 ____________________________________________________________
 ____________________________________________________________
  I do not understand this command. Please input a valid command.
@@ -194,6 +194,67 @@ ____________________________________________________________
 ____________________________________________________________
 ____________________________________________________________
  1. [T][ ] reversible task
+____________________________________________________________
+____________________________________________________________
+ Bye. Hope to see you again soon!
+____________________________________________________________
+```
+
+### UI-04: Delete a task from the list
+
+- **Aim:** Verify that deletion removes the selected task, reports the updated count, rejects an out-of-range task number without changing the list, and shifts later tasks into the correct positions.
+- **Inputs (in order):**
+
+```text
+todo borrow book
+deadline return book /by Sunday
+event project meeting /from Mon 2pm /to 4pm
+delete 99
+delete 2
+list
+bye
+```
+
+- **Expected output:**
+
+```text
+____________________________________________________________
+███╗   ███╗███████╗██╗  ██╗ █████╗
+████╗ ████║██╔════╝██║ ██╔╝██╔══██╗
+██╔████╔██║█████╗  █████╔╝ ███████║
+██║╚██╔╝██║██╔══╝  ██╔═██╗ ██╔══██║
+██║ ╚═╝ ██║███████╗██║  ██╗██║  ██║
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
+
+ Hello! I'm MEKA.
+ What can I do for you?
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] borrow book
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [D][ ] return book (by: Sunday)
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [E][ ] project meeting (from: Mon 2pm to: 4pm)
+ Now you have 3 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ The task number does not exist in the list.
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [D][ ] return book (by: Sunday)
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ 1. [T][ ] borrow book
+ 2. [E][ ] project meeting (from: Mon 2pm to: 4pm)
 ____________________________________________________________
 ____________________________________________________________
  Bye. Hope to see you again soon!
