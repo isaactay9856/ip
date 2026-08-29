@@ -158,3 +158,10 @@ Use Java 25. On Windows, replace `./gradlew` with `./gradlew.bat`.
 ./gradlew run --console=plain
 ./gradlew test
 ```
+
+## Building the executable JAR
+
+```shell
+./gradlew shadowJar
+java -jar build/libs/meka.jar
+```
