@@ -5,7 +5,7 @@ package meka.task;
  */
 public class Task {
     /** Description entered by the user for this task. */
-    private String description;
+    private final String description;
 
     /** Whether this task has been marked as completed. */
     private boolean isDone;

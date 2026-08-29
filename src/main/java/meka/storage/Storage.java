@@ -103,17 +103,17 @@ public class Storage {
 
         int expectedFieldCount;
         switch (fields[0]) {
-        case "T":
-            expectedFieldCount = 3;
-            break;
-        case "D":
-            expectedFieldCount = 4;
-            break;
-        case "E":
-            expectedFieldCount = 5;
-            break;
-        default:
-            throw invalidData(lineNumber, "unknown task type");
+            case "T":
+                expectedFieldCount = 3;
+                break;
+            case "D":
+                expectedFieldCount = 4;
+                break;
+            case "E":
+                expectedFieldCount = 5;
+                break;
+            default:
+                throw invalidData(lineNumber, "unknown task type");
         }
 
         if (fields.length != expectedFieldCount) {
@@ -131,18 +131,18 @@ public class Storage {
         Task task;
         try {
             switch (fields[0]) {
-            case "T":
-                task = new Todo(fields[2]);
-                break;
-            case "D":
-                task = new Deadline(fields[2], LocalDateTime.parse(fields[3]));
-                break;
-            case "E":
-                task = new Event(fields[2], LocalDateTime.parse(fields[3]),
-                        LocalDateTime.parse(fields[4]));
-                break;
-            default:
-                throw invalidData(lineNumber, "unknown task type");
+                case "T":
+                    task = new Todo(fields[2]);
+                    break;
+                case "D":
+                    task = new Deadline(fields[2], LocalDateTime.parse(fields[3]));
+                    break;
+                case "E":
+                    task = new Event(fields[2], LocalDateTime.parse(fields[3]),
+                            LocalDateTime.parse(fields[4]));
+                    break;
+                default:
+                    throw invalidData(lineNumber, "unknown task type");
             }
         } catch (DateTimeParseException exception) {
             throw invalidData(lineNumber, "invalid date and time");

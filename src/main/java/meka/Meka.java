@@ -40,16 +40,16 @@ public class Meka {
         storage = new Storage(Path.of(filePath));
 
         TaskList loadedTasks;
-        boolean loadingFailed = false;
+        boolean hasLoadFailed = false;
         try {
             loadedTasks = storage.load();
         } catch (DataFileException | IOException | SecurityException exception) {
             loadedTasks = new TaskList();
-            loadingFailed = true;
+            hasLoadFailed = true;
             storage.markUnavailable();
         }
         tasks = loadedTasks;
-        hasLoadingError = loadingFailed;
+        hasLoadingError = hasLoadFailed;
     }
 
     /**
