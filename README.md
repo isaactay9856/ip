@@ -1,26 +1,151 @@
-# MEKA project template
+# MEKA
 
-This is a project template for a greenfield Java project. Given below are instructions on how to use it.
+MEKA is a command-line task chatbot written in Java. It keeps track of todos,
+deadlines, and events, remembers whether tasks are complete, and restores saved
+tasks the next time it starts.
 
-## Setting up in Intellij
+## Features by level
 
-Prerequisites: JDK 25, update Intellij to the most recent version.
+### Level 1: Chatbot interaction
 
-1. Open Intellij (if you are not in the welcome screen, click `File` > `Close Project` to close the existing project first)
-1. Open the project into Intellij as follows:
-   1. Click `Open`.
-   1. Select the project directory, and click `OK`.
-   1. If there are any further prompts, accept the defaults.
-1. Configure the project to use **JDK 25** (not other versions) as explained in [here](https://www.jetbrains.com/help/idea/sdk.html#set-up-jdk).<br>
-   In the same dialog, set the **Project language level** field to the `SDK default` option.
-1. After that, locate the `src/main/java/MEKA.java` file, right-click it, and choose `Run MEKA.main()` (if the code editor is showing compile errors, try restarting the IDE). If the setup is correct, you should see something like the below as the output:
-   ```
-███╗   ███╗███████╗██╗  ██╗ █████╗
-████╗ ████║██╔════╝██║ ██╔╝██╔══██╗
-██╔████╔██║█████╗  █████╔╝ ███████║
-██║╚██╔╝██║██╔══╝  ██╔═██╗ ██╔══██║
-██║ ╚═╝ ██║███████╗██║  ██╗██║  ██║
-╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
-   ```
+MEKA greets the user when it starts and ends the conversation when the user
+enters `bye`.
 
-**Warning:** Keep the `src\main\java` folder as the root folder for Java files (i.e., don't rename those folders or move Java files to another folder outside of this folder path), as this is the default location some tools (e.g., Gradle) expect to find Java files.
+```text
+bye
+```
+
+### Level 2: Todo tasks
+
+Create a task that has no attached date or time:
+
+```text
+todo borrow book
+```
+
+MEKA displays todos with the `[T]` task-type marker and `[ ]` completion marker.
+
+### Level 3: Task list
+
+MEKA stores multiple tasks during a session. Enter `list` to display every task
+with its one-based task number:
+
+```text
+list
+```
+
+```text
+1. [T][ ] borrow book
+2. [T][ ] read lecture notes
+```
+
+### Level 4: Task status
+
+Mark a task as complete or incomplete by referring to its list number:
+
+```text
+mark 1
+unmark 1
+```
+
+Completed tasks use `[X]`; incomplete tasks use `[ ]`.
+
+### Level 5: Deadlines and events
+
+Create a deadline with `/by`:
+
+```text
+deadline return book /by 2/12/2019 1800
+```
+
+Create an event with `/from` and `/to`:
+
+```text
+event project meeting /from 3/12/2019 0900 /to 3/12/2019 1100
+```
+
+Deadlines use `[D]`, while events use `[E]`.
+
+### Level 6: Delete tasks
+
+Delete a task by its list number:
+
+```text
+delete 2
+```
+
+MEKA confirms the removed task and reports the new number of tasks.
+
+### Level 7: Validation and persistence
+
+MEKA reports friendly errors for unknown commands, missing descriptions,
+missing or non-numeric task numbers, invalid task numbers, missing date-times,
+and malformed saved data. Invalid commands do not add or alter tasks.
+
+Tasks are saved automatically to `data/meka.txt` after a successful change.
+The file records each task's type, completion state, description, and any ISO
+date-time values. MEKA loads these tasks automatically on its next run.
+
+### Level 8: Date and time
+
+Deadline and event values are stored as `java.time.LocalDateTime`, not plain
+strings. Enter date-times using `d/M/yyyy HHmm`, where `HHmm` is 24-hour time:
+
+```text
+2/12/2019 1800
+```
+
+MEKA understands this as 2 December 2019 at 6:00 PM and displays it as:
+
+```text
+Dec 02 2019, 6:00 PM
+```
+
+Invalid values such as `29/2/2019 1800` or `2/12/2019 2500` are rejected.
+Saved date-times use the ISO form `2019-12-02T18:00` for reliable parsing.
+
+## Command summary
+
+| Command | Purpose |
+| --- | --- |
+| `todo DESCRIPTION` | Add a todo task |
+| `deadline DESCRIPTION /by DATE_TIME` | Add a deadline |
+| `event DESCRIPTION /from DATE_TIME /to DATE_TIME` | Add an event |
+| `list` | Show all tasks |
+| `mark NUMBER` | Mark a task as complete |
+| `unmark NUMBER` | Mark a task as incomplete |
+| `delete NUMBER` | Delete a task |
+| `bye` | Exit MEKA |
+
+For deadline and event commands, replace `DATE_TIME` with a value such as
+`2/12/2019 1800`.
+
+## Requirements
+
+- Java Development Kit (JDK) 25
+- IntelliJ IDEA, or a terminal with `javac` and `java`
+
+## Running in IntelliJ IDEA
+
+1. Open this repository as an IntelliJ IDEA project.
+2. Configure the Project SDK as JDK 25 and leave the language level as
+   `SDK default`.
+3. Open `src/main/java/MEKA.java`.
+4. Run `MEKA.main()`.
+
+## Running from a terminal
+
+From the repository root, compile the source files:
+
+```shell
+javac -encoding UTF-8 -d out src/main/java/*.java
+```
+
+Then run MEKA:
+
+```shell
+java -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -cp out MEKA
+```
+
+Keep `src/main/java` as the Java source root so the project structure remains
+compatible with standard Java build tools.

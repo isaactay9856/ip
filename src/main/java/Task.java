@@ -2,7 +2,10 @@
  * Represents a task and whether it has been completed.
  */
 public class Task {
+    /** Description entered by the user for this task. */
     private String description;
+
+    /** Whether this task has been marked as completed. */
     private boolean isDone;
 
     /**
@@ -60,7 +63,7 @@ public class Task {
     /**
      * Returns the task with its completion status for display.
      *
-     * @return a task formatted as "[x] description" or "[ ] description"
+     * @return a task formatted as "[X] description" or "[ ] description"
      */
     @Override
     public String toString() {
