@@ -2,118 +2,81 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 /**
- * Console chatbot for creating, updating, deleting, and persistently storing
- * todo, deadline, and event tasks.
+ * Coordinates MEKA's user interface, task list, command parser, and storage.
  */
 public class MEKA {
+    /** Storage component used to load and save tasks. */
+    private final Storage storage;
+
+    /** Tasks available in the current MEKA session. */
+    private final TaskList tasks;
+
+    /** Console interface used to interact with the user. */
+    private final Ui ui;
+
+    /** Whether startup encountered an error while loading saved tasks. */
+    private final boolean hasLoadingError;
+
     /**
-     * Prevents construction because MEKA is started through {@link #main(String[])}.
+     * Creates MEKA and loads tasks from the specified data file.
+     *
+     * If loading fails, MEKA starts with an empty in-memory task list and
+     * avoids overwriting the unreadable data file.
+     *
+     * @param filePath location of the task data file
      */
-    private MEKA() {
+    public MEKA(String filePath) {
+        ui = new Ui();
+        storage = new Storage(Path.of(filePath));
+
+        TaskList loadedTasks;
+        boolean loadingFailed = false;
+        try {
+            loadedTasks = storage.load();
+        } catch (DataFileException | IOException | SecurityException exception) {
+            loadedTasks = new TaskList();
+            loadingFailed = true;
+            storage.markUnavailable();
+        }
+        tasks = loadedTasks;
+        hasLoadingError = loadingFailed;
     }
 
     /**
-     * Starts MEKA, loads saved tasks, and processes commands until input ends
-     * or the user enters {@code bye}.
-     *
-     * @param args command-line arguments; not used
+     * Processes commands until input ends or an exit command is executed.
      */
-    public static void main(String[] args) {
-        Ui ui = new Ui();
-        Storage storage = new Storage(Path.of("data", "meka.txt"));
-        TaskList tasks;
-        boolean storageAvailable = true;
-        try {
-            tasks = storage.load();
-        } catch (DataFileException | IOException | SecurityException exception) {
-            tasks = new TaskList();
-            storageAvailable = false;
-        }
-
+    public void run() {
         ui.showWelcome();
-        if (!storageAvailable) {
+        if (hasLoadingError) {
             ui.showLoadingError();
         }
         ui.showLine();
 
-        while (ui.hasNextCommand()) {
-            String command = ui.readCommand();
-
-            if (command.equals("bye")) {
-                ui.showGoodbye();
-                break;
-            }
-
+        boolean isExit = false;
+        while (!isExit && ui.hasNextCommand()) {
+            String fullCommand = ui.readCommand();
             ui.showLine();
             try {
-                String commandWord = Parser.getCommandWord(command);
-                if (commandWord.equals("list")) {
-                    ui.showTaskList(tasks);
-
-                } else if (commandWord.equals("mark")) {
-                    int taskNumber = Parser.parseTaskNumber(command, "mark");
-                    Task task = tasks.get(taskNumber);
-                    task.markAsDone();
-                    saveTasks(storage, tasks, storageAvailable);
-                    ui.showTaskMarked(task);
-
-                } else if (commandWord.equals("unmark")) {
-                    int taskNumber = Parser.parseTaskNumber(command, "unmark");
-                    Task task = tasks.get(taskNumber);
-                    task.unmark();
-                    saveTasks(storage, tasks, storageAvailable);
-                    ui.showTaskUnmarked(task);
-
-                } else if (commandWord.equals("delete")) {
-                    int taskNumber = Parser.parseTaskNumber(command, "delete");
-                    Task task = tasks.delete(taskNumber);
-                    saveTasks(storage, tasks, storageAvailable);
-                    ui.showTaskDeleted(task, tasks.size());
-
-                } else if (commandWord.equals("todo")) {
-                    Task task = Parser.parseTodo(command);
-                    tasks.add(task);
-                    saveTasks(storage, tasks, storageAvailable);
-                    ui.showTaskAdded(task, tasks.size());
-
-                } else if (commandWord.equals("deadline")) {
-                    Task task = Parser.parseDeadline(command);
-                    tasks.add(task);
-                    saveTasks(storage, tasks, storageAvailable);
-                    ui.showTaskAdded(task, tasks.size());
-
-                } else if (commandWord.equals("event")) {
-                    Task task = Parser.parseEvent(command);
-                    tasks.add(task);
-                    saveTasks(storage, tasks, storageAvailable);
-                    ui.showTaskAdded(task, tasks.size());
-
-                }
+                Command command = Parser.parse(fullCommand);
+                command.execute(tasks, ui, storage);
+                isExit = command.isExit();
             } catch (MekaException exception) {
                 ui.showError(exception.getMessage());
             } catch (IOException | SecurityException exception) {
-                storageAvailable = false;
+                storage.markUnavailable();
                 ui.showSavingError();
+            } finally {
+                ui.showLine();
             }
-            ui.showLine();
         }
     }
 
     /**
-     * Saves all current tasks when the storage component is available.
+     * Starts MEKA using its default task data file.
      *
-     * @param storage storage component that writes the data file
-     * @param tasks tasks to save
-     * @param storageAvailable whether loading or an earlier save succeeded
-     * @throws IOException if storage is unavailable or the data file cannot be written
+     * @param args command-line arguments; not used
      */
-    private static void saveTasks(Storage storage, TaskList tasks,
-            boolean storageAvailable)
-            throws IOException {
-        if (!storageAvailable) {
-            throw new IOException("Task storage is unavailable");
-        }
-        storage.save(tasks);
+    public static void main(String[] args) {
+        new MEKA("data/meka.txt").run();
     }
-
 }

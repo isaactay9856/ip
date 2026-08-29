@@ -33,24 +33,36 @@ public class Parser {
     }
 
     /**
-     * Identifies the command word at the start of the input.
+     * Converts user input into the corresponding executable command.
      *
      * @param input complete user input
-     * @return the recognized command word
-     * @throws MekaException if the command is not recognized
+     * @return parsed command object
+     * @throws MekaException if the command or its arguments are invalid
      */
-    public static String getCommandWord(String input) throws MekaException {
-        if (input.equals("list")) {
-            return "list";
+    public static Command parse(String input) throws MekaException {
+        if (input.equals("bye")) {
+            return new ExitCommand();
         }
-
-        String[] commandsWithArguments = {
-            "mark", "unmark", "delete", "todo", "deadline", "event"
-        };
-        for (String command : commandsWithArguments) {
-            if (isCommand(input, command)) {
-                return command;
-            }
+        if (input.equals("list")) {
+            return new ListCommand();
+        }
+        if (isCommand(input, "mark")) {
+            return new MarkCommand(parseTaskNumber(input, "mark"));
+        }
+        if (isCommand(input, "unmark")) {
+            return new UnmarkCommand(parseTaskNumber(input, "unmark"));
+        }
+        if (isCommand(input, "delete")) {
+            return new DeleteCommand(parseTaskNumber(input, "delete"));
+        }
+        if (isCommand(input, "todo")) {
+            return new AddCommand(parseTodo(input));
+        }
+        if (isCommand(input, "deadline")) {
+            return new AddCommand(parseDeadline(input));
+        }
+        if (isCommand(input, "event")) {
+            return new AddCommand(parseEvent(input));
         }
         throw new MekaException(UNKNOWN_COMMAND_MESSAGE);
     }
@@ -63,7 +75,7 @@ public class Parser {
      * @return the supplied task number
      * @throws MekaException if the number is missing or is not numeric
      */
-    public static int parseTaskNumber(String input, String command) throws MekaException {
+    private static int parseTaskNumber(String input, String command) throws MekaException {
         String numberText = input.substring(command.length()).trim();
         if (numberText.isEmpty()) {
             throw new MekaException(NUMBER_REQUIRED_MESSAGE);
@@ -82,7 +94,7 @@ public class Parser {
      * @return parsed todo task
      * @throws MekaException if the description is missing or cannot be stored
      */
-    public static Task parseTodo(String input) throws MekaException {
+    private static Task parseTodo(String input) throws MekaException {
         return new Todo(parseDescription(input, "todo"));
     }
 
@@ -93,7 +105,7 @@ public class Parser {
      * @return parsed deadline task
      * @throws MekaException if required task details are missing or invalid
      */
-    public static Task parseDeadline(String input) throws MekaException {
+    private static Task parseDeadline(String input) throws MekaException {
         int byIndex = findArgumentMarker(input, "by");
         String description = byIndex < 0
                 ? parseDescription(input, "deadline")
@@ -115,7 +127,7 @@ public class Parser {
      * @return parsed event task
      * @throws MekaException if required task details are missing or invalid
      */
-    public static Task parseEvent(String input) throws MekaException {
+    private static Task parseEvent(String input) throws MekaException {
         int fromIndex = findArgumentMarker(input, "from");
         int toIndex = fromIndex < 0
                 ? -1

@@ -12,6 +12,9 @@ public class Storage {
     /** Location of the task data file. */
     private final Path filePath;
 
+    /** Whether the data file remains safe and available for saving. */
+    private boolean isAvailable;
+
     /**
      * Creates a storage component that uses the given data file.
      *
@@ -19,6 +22,7 @@ public class Storage {
      */
     public Storage(Path filePath) {
         this.filePath = filePath;
+        this.isAvailable = true;
     }
 
     /**
@@ -55,6 +59,9 @@ public class Storage {
      * @throws IOException if the data directory or file cannot be written
      */
     public void save(TaskList tasks) throws IOException {
+        if (!isAvailable) {
+            throw new IOException("Task storage is unavailable");
+        }
         Files.createDirectories(filePath.getParent());
 
         ArrayList<String> taskData = new ArrayList<>();
@@ -62,6 +69,13 @@ public class Storage {
             taskData.add(task.toDataString());
         }
         Files.write(filePath, taskData);
+    }
+
+    /**
+     * Prevents later save attempts after loading or saving has failed.
+     */
+    public void markUnavailable() {
+        isAvailable = false;
     }
 
     /**
