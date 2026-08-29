@@ -20,6 +20,16 @@ public class Event extends Task {
     }
 
     /**
+     * Returns a representation of this event suitable for saving to a file.
+     *
+     * @return the task type, completion status, description, start, and end
+     */
+    @Override
+    public String toDataString() {
+        return formatDataString("E") + " | " + from + " | " + to;
+    }
+
+    /**
      * Returns the event with its type, completion status, and time range.
      *
      * @return the task formatted as
