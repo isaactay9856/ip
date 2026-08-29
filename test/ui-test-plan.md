@@ -496,3 +496,46 @@ ____________________________________________________________
 ```
 
 - **Expected data path:** `data/meka.txt` remains a directory.
+
+### UI-09: Find tasks by description keyword
+
+- **Aim:** Verify that `find` lists only tasks whose descriptions contain the keyword, ignores letter case, and numbers the matching results consecutively.
+- **Pre-test data file:** Copy `test/data/load-all-task-types.txt` to `data/meka.txt`.
+- **Inputs (in order):**
+
+```text
+find BOOK
+bye
+```
+
+- **Expected output:**
+
+```text
+____________________________________________________________
+███╗   ███╗███████╗██╗  ██╗ █████╗
+████╗ ████║██╔════╝██║ ██╔╝██╔══██╗
+██╔████╔██║█████╗  █████╔╝ ███████║
+██║╚██╔╝██║██╔══╝  ██╔═██╗ ██╔══██║
+██║ ╚═╝ ██║███████╗██║  ██╗██║  ██║
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
+
+ Hello! I'm MEKA.
+ What can I do for you?
+____________________________________________________________
+____________________________________________________________
+ Here are the matching tasks in your list:
+ 1. [T][X] read book
+ 2. [D][ ] return book (by: Jun 06 2019, 6:00 PM)
+____________________________________________________________
+____________________________________________________________
+ Bye. Hope to see you again soon!
+____________________________________________________________
+```
+
+- **Expected `data/meka.txt`:**
+
+```text
+T | 1 | read book
+D | 0 | return book | 2019-06-06T18:00
+E | 1 | project meeting | 2019-08-06T14:00 | 2019-08-06T16:00
+```

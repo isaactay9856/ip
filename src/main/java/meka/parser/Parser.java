@@ -10,6 +10,7 @@ import meka.command.AddCommand;
 import meka.command.Command;
 import meka.command.DeleteCommand;
 import meka.command.ExitCommand;
+import meka.command.FindCommand;
 import meka.command.ListCommand;
 import meka.command.MarkCommand;
 import meka.command.UnmarkCommand;
@@ -50,9 +51,9 @@ public class Parser {
     /**
      * Converts user input into the corresponding executable command.
      *
-     * @param input complete user input
-     * @return parsed command object
-     * @throws MekaException if the command or its arguments are invalid
+     * @param input complete user input.
+     * @return parsed command object.
+     * @throws MekaException if the command or its arguments are invalid.
      */
     public static Command parse(String input) throws MekaException {
         if (input.equals("bye")) {
@@ -60,6 +61,9 @@ public class Parser {
         }
         if (input.equals("list")) {
             return new ListCommand();
+        }
+        if (isCommand(input, "find")) {
+            return new FindCommand(parseDescription(input, "find"));
         }
         if (isCommand(input, "mark")) {
             return new MarkCommand(parseTaskNumber(input, "mark"));
@@ -85,10 +89,10 @@ public class Parser {
     /**
      * Extracts a task number from a mark, unmark, or delete command.
      *
-     * @param input complete user input
-     * @param command command word at the start of the input
-     * @return the supplied task number
-     * @throws MekaException if the number is missing or is not numeric
+     * @param input complete user input.
+     * @param command command word at the start of the input.
+     * @return the supplied task number.
+     * @throws MekaException if the number is missing or is not numeric.
      */
     private static int parseTaskNumber(String input, String command) throws MekaException {
         String numberText = input.substring(command.length()).trim();
@@ -105,9 +109,9 @@ public class Parser {
     /**
      * Creates a todo task from a user command.
      *
-     * @param input complete todo command
-     * @return parsed todo task
-     * @throws MekaException if the description is missing or cannot be stored
+     * @param input complete todo command.
+     * @return parsed todo task.
+     * @throws MekaException if the description is missing or cannot be stored.
      */
     private static Task parseTodo(String input) throws MekaException {
         return new Todo(parseDescription(input, "todo"));
@@ -116,9 +120,9 @@ public class Parser {
     /**
      * Creates a deadline task from a user command.
      *
-     * @param input complete deadline command
-     * @return parsed deadline task
-     * @throws MekaException if required task details are missing or invalid
+     * @param input complete deadline command.
+     * @return parsed deadline task.
+     * @throws MekaException if required task details are missing or invalid.
      */
     private static Task parseDeadline(String input) throws MekaException {
         int byIndex = findArgumentMarker(input, "by");
@@ -138,9 +142,9 @@ public class Parser {
     /**
      * Creates an event task from a user command.
      *
-     * @param input complete event command
-     * @return parsed event task
-     * @throws MekaException if required task details are missing or invalid
+     * @param input complete event command.
+     * @return parsed event task.
+     * @throws MekaException if required task details are missing or invalid.
      */
     private static Task parseEvent(String input) throws MekaException {
         int fromIndex = findArgumentMarker(input, "from");
@@ -166,9 +170,9 @@ public class Parser {
      * Returns whether the input contains the given command word, optionally
      * followed by arguments.
      *
-     * @param input complete user input
-     * @param command command word to match
-     * @return true if the input represents the command
+     * @param input complete user input.
+     * @param command command word to match.
+     * @return true if the input represents the command.
      */
     private static boolean isCommand(String input, String command) {
         return input.equals(command) || input.startsWith(command + " ");
@@ -178,9 +182,9 @@ public class Parser {
      * Finds a slash-prefixed argument marker such as {@code /by} or
      * {@code /from}.
      *
-     * @param input complete user input
-     * @param marker marker name without the slash
-     * @return the marker's starting index, or -1 if it is not present
+     * @param input complete user input.
+     * @param marker marker name without the slash.
+     * @return the marker's starting index, or -1 if it is not present.
      */
     private static int findArgumentMarker(String input, String marker) {
         return findArgumentMarker(input, marker, 0);
@@ -193,10 +197,10 @@ public class Parser {
      * whitespace, preventing text such as {@code /bye} from matching
      * {@code /by}.
      *
-     * @param input complete user input
-     * @param marker marker name without the slash
-     * @param startIndex index at which to begin searching
-     * @return the marker's starting index, or -1 if it is not present
+     * @param input complete user input.
+     * @param marker marker name without the slash.
+     * @param startIndex index at which to begin searching.
+     * @return the marker's starting index, or -1 if it is not present.
      */
     private static int findArgumentMarker(String input, String marker, int startIndex) {
         String markerText = " /" + marker;
@@ -216,10 +220,10 @@ public class Parser {
     /**
      * Extracts and validates a task description from a task creation command.
      *
-     * @param input complete user input
-     * @param command command word at the start of the input
-     * @return the non-empty task description
-     * @throws MekaException if the description is empty
+     * @param input complete user input.
+     * @param command command word at the start of the input.
+     * @return the non-empty task description.
+     * @throws MekaException if the description is empty.
      */
     private static String parseDescription(String input, String command) throws MekaException {
         String description = input.substring(command.length()).trim();
@@ -230,8 +234,8 @@ public class Parser {
     /**
      * Ensures a task description contains visible characters and can be stored.
      *
-     * @param description task description to validate
-     * @throws MekaException if the description is empty or contains the file delimiter
+     * @param description task description to validate.
+     * @throws MekaException if the description is empty or contains the file delimiter.
      */
     private static void requireDescription(String description) throws MekaException {
         requireStorableText(description, DESCRIPTION_REQUIRED_MESSAGE);
@@ -240,8 +244,8 @@ public class Parser {
     /**
      * Ensures a date-time argument is present and can be stored safely.
      *
-     * @param dateTime date and time text to validate
-     * @throws MekaException if the value is empty or contains the file delimiter
+     * @param dateTime date and time text to validate.
+     * @throws MekaException if the value is empty or contains the file delimiter.
      */
     private static void requireDateTime(String dateTime) throws MekaException {
         requireStorableText(dateTime, DATE_TIME_REQUIRED_MESSAGE);
@@ -250,9 +254,9 @@ public class Parser {
     /**
      * Parses a user-entered date and time in the {@code d/M/yyyy HHmm} format.
      *
-     * @param dateTime date and time text supplied by the user
-     * @return the parsed date and time
-     * @throws MekaException if the text is not a valid date and time
+     * @param dateTime date and time text supplied by the user.
+     * @return the parsed date and time.
+     * @throws MekaException if the text is not a valid date and time.
      */
     private static LocalDateTime parseDateTime(String dateTime) throws MekaException {
         try {
@@ -265,9 +269,9 @@ public class Parser {
     /**
      * Validates user-entered text before placing it in the pipe-separated file.
      *
-     * @param text text to validate
-     * @param emptyMessage message to use when the text is empty
-     * @throws MekaException if the text is empty or contains the file delimiter
+     * @param text text to validate.
+     * @param emptyMessage message to use when the text is empty.
+     * @throws MekaException if the text is empty or contains the file delimiter.
      */
     private static void requireStorableText(String text, String emptyMessage)
             throws MekaException {

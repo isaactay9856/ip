@@ -1,6 +1,8 @@
 package meka.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -60,6 +62,20 @@ public class TaskTest {
         task.markAsDone();
 
         assertEquals("X", task.getStatusIcon());
+    }
+
+    @Test
+    public void containsKeyword_matchingKeywordWithDifferentCase_returnsTrue() {
+        Task task = new Task("Read a Book");
+
+        assertTrue(task.containsKeyword("book"));
+    }
+
+    @Test
+    public void containsKeyword_keywordNotInDescription_returnsFalse() {
+        Task task = new Task("read a book");
+
+        assertFalse(task.containsKeyword("return"));
     }
 
     @Test
