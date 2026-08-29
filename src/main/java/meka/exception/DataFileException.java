@@ -8,7 +8,7 @@ public class DataFileException extends Exception {
     /**
      * Creates an exception describing invalid saved data.
      *
-     * @param message explanation of the invalid data
+     * @param message explanation of the invalid data.
      */
     public DataFileException(String message) {
         super(message);

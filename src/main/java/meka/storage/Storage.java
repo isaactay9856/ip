@@ -27,7 +27,7 @@ public class Storage {
     /**
      * Creates a storage component that uses the given data file.
      *
-     * @param filePath location of the task data file
+     * @param filePath location of the task data file.
      */
     public Storage(Path filePath) {
         this.filePath = filePath;
@@ -37,9 +37,9 @@ public class Storage {
     /**
      * Loads saved tasks from the data file.
      *
-     * @return the saved tasks, or an empty list if the data file does not exist
-     * @throws IOException if the data file cannot be read
-     * @throws DataFileException if the data file contains an invalid record
+     * @return the saved tasks, or an empty list if the data file does not exist.
+     * @throws IOException if the data file cannot be read.
+     * @throws DataFileException if the data file contains an invalid record.
      */
     public TaskList load() throws IOException, DataFileException {
         ArrayList<Task> tasks = new ArrayList<>();
@@ -64,8 +64,8 @@ public class Storage {
     /**
      * Saves all current tasks to the data file.
      *
-     * @param tasks task list to save
-     * @throws IOException if the data directory or file cannot be written
+     * @param tasks task list to save.
+     * @throws IOException if the data directory or file cannot be written.
      */
     public void save(TaskList tasks) throws IOException {
         if (!isAvailable) {
@@ -90,10 +90,10 @@ public class Storage {
     /**
      * Converts one saved data line back into its corresponding task object.
      *
-     * @param line pipe-separated task data
-     * @param lineNumber line number used to identify invalid data
-     * @return the reconstructed task
-     * @throws DataFileException if the line contains invalid task data
+     * @param line pipe-separated task data.
+     * @param lineNumber line number used to identify invalid data.
+     * @return the reconstructed task.
+     * @throws DataFileException if the line contains invalid task data.
      */
     private Task parseTask(String line, int lineNumber) throws DataFileException {
         String[] fields = line.split(" \\| ", -1);
@@ -103,17 +103,17 @@ public class Storage {
 
         int expectedFieldCount;
         switch (fields[0]) {
-        case "T":
-            expectedFieldCount = 3;
-            break;
-        case "D":
-            expectedFieldCount = 4;
-            break;
-        case "E":
-            expectedFieldCount = 5;
-            break;
-        default:
-            throw invalidData(lineNumber, "unknown task type");
+            case "T":
+                expectedFieldCount = 3;
+                break;
+            case "D":
+                expectedFieldCount = 4;
+                break;
+            case "E":
+                expectedFieldCount = 5;
+                break;
+            default:
+                throw invalidData(lineNumber, "unknown task type");
         }
 
         if (fields.length != expectedFieldCount) {
@@ -131,18 +131,18 @@ public class Storage {
         Task task;
         try {
             switch (fields[0]) {
-            case "T":
-                task = new Todo(fields[2]);
-                break;
-            case "D":
-                task = new Deadline(fields[2], LocalDateTime.parse(fields[3]));
-                break;
-            case "E":
-                task = new Event(fields[2], LocalDateTime.parse(fields[3]),
-                        LocalDateTime.parse(fields[4]));
-                break;
-            default:
-                throw invalidData(lineNumber, "unknown task type");
+                case "T":
+                    task = new Todo(fields[2]);
+                    break;
+                case "D":
+                    task = new Deadline(fields[2], LocalDateTime.parse(fields[3]));
+                    break;
+                case "E":
+                    task = new Event(fields[2], LocalDateTime.parse(fields[3]),
+                            LocalDateTime.parse(fields[4]));
+                    break;
+                default:
+                    throw invalidData(lineNumber, "unknown task type");
             }
         } catch (DateTimeParseException exception) {
             throw invalidData(lineNumber, "invalid date and time");
@@ -157,9 +157,9 @@ public class Storage {
     /**
      * Creates a data-file exception that identifies the invalid line.
      *
-     * @param lineNumber one-based line number
-     * @param reason reason the record is invalid
-     * @return an exception describing the invalid data
+     * @param lineNumber one-based line number.
+     * @param reason reason the record is invalid.
+     * @return an exception describing the invalid data.
      */
     private DataFileException invalidData(int lineNumber, String reason) {
         return new DataFileException("Invalid data on line " + lineNumber + ": " + reason);

@@ -18,8 +18,8 @@ public class Deadline extends Task {
     /**
      * Creates a deadline task.
      *
-     * @param description description of the task
-     * @param by date and time by which the task must be completed
+     * @param description description of the task.
+     * @param by date and time by which the task must be completed.
      */
     public Deadline(String description, LocalDateTime by) {
         super(description);
@@ -32,7 +32,7 @@ public class Deadline extends Task {
      * The date-time uses the ISO local date-time format so it can be parsed
      * reliably when MEKA starts again.
      *
-     * @return the task type, completion status, description, and ISO deadline
+     * @return the task type, completion status, description, and ISO deadline.
      */
     @Override
     public String toDataString() {
@@ -43,7 +43,7 @@ public class Deadline extends Task {
      * Returns the deadline with its type, completion status, and due date-time.
      *
      * @return the task formatted as
-     *         "[D][ ] description (by: MMM dd yyyy, h:mm a)"
+     *         "[D][ ] description (by: MMM dd yyyy, h:mm a)".
      */
     @Override
     public String toString() {
