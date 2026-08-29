@@ -1,4 +1,9 @@
+package meka.ui;
+
 import java.util.Scanner;
+
+import meka.task.Task;
+import meka.task.TaskList;
 
 /**
  * Handles all console input and output for MEKA.

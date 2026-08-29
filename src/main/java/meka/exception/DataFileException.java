@@ -1,3 +1,5 @@
+package meka.exception;
+
 /**
  * Represents invalid task data found while loading the saved task file.
  */

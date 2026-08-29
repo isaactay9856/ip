@@ -1,4 +1,11 @@
+package meka.command;
+
 import java.io.IOException;
+
+import meka.storage.Storage;
+import meka.task.Task;
+import meka.task.TaskList;
+import meka.ui.Ui;
 
 /**
  * Adds a parsed task to the task list and saves the updated list.

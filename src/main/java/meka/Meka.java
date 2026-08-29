@@ -1,10 +1,20 @@
+package meka;
+
 import java.io.IOException;
 import java.nio.file.Path;
+
+import meka.command.Command;
+import meka.exception.DataFileException;
+import meka.exception.MekaException;
+import meka.parser.Parser;
+import meka.storage.Storage;
+import meka.task.TaskList;
+import meka.ui.Ui;
 
 /**
  * Coordinates MEKA's user interface, task list, command parser, and storage.
  */
-public class MEKA {
+public class Meka {
     /** Storage component used to load and save tasks. */
     private final Storage storage;
 
@@ -25,7 +35,7 @@ public class MEKA {
      *
      * @param filePath location of the task data file
      */
-    public MEKA(String filePath) {
+    public Meka(String filePath) {
         ui = new Ui();
         storage = new Storage(Path.of(filePath));
 
@@ -77,6 +87,6 @@ public class MEKA {
      * @param args command-line arguments; not used
      */
     public static void main(String[] args) {
-        new MEKA("data/meka.txt").run();
+        new Meka("data/meka.txt").run();
     }
 }

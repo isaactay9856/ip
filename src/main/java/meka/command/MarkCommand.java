@@ -1,4 +1,12 @@
+package meka.command;
+
 import java.io.IOException;
+
+import meka.exception.MekaException;
+import meka.storage.Storage;
+import meka.task.Task;
+import meka.task.TaskList;
+import meka.ui.Ui;
 
 /**
  * Marks a numbered task as completed.

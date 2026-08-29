@@ -1,3 +1,5 @@
+package meka.exception;
+
 /**
  * Represents an invalid command entered by the user.
  */

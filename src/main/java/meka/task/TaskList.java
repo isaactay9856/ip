@@ -1,5 +1,9 @@
+package meka.task;
+
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import meka.exception.MekaException;
 
 /**
  * Manages the collection of tasks used by MEKA.

@@ -1,3 +1,5 @@
+package meka.task;
+
 /**
  * Represents a task and whether it has been completed.
  */
@@ -70,5 +72,3 @@ public class Task {
         return "[" + getStatusIcon() + "] " + description;
     }
 }
-
-

@@ -1,3 +1,9 @@
+package meka.command;
+
+import meka.storage.Storage;
+import meka.task.TaskList;
+import meka.ui.Ui;
+
 /**
  * Ends the current MEKA session.
  */

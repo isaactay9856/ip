@@ -130,21 +130,21 @@ For deadline and event commands, replace `DATE_TIME` with a value such as
 1. Open this repository as an IntelliJ IDEA project.
 2. Configure the Project SDK as JDK 25 and leave the language level as
    `SDK default`.
-3. Open `src/main/java/MEKA.java`.
-4. Run `MEKA.main()`.
+3. Open `src/main/java/meka/Meka.java`.
+4. Run `Meka.main()`.
 
 ## Running from a terminal
 
 From the repository root, compile the source files:
 
 ```shell
-javac -encoding UTF-8 -d out src/main/java/*.java
+javac -encoding UTF-8 -d out (Get-ChildItem src/main/java -Recurse -Filter *.java).FullName
 ```
 
 Then run MEKA:
 
 ```shell
-java -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -cp out MEKA
+java -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -cp out meka.Meka
 ```
 
 Keep `src/main/java` as the Java source root so the project structure remains
