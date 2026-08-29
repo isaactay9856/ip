@@ -33,7 +33,7 @@ public class Meka {
      * If loading fails, MEKA starts with an empty in-memory task list and
      * avoids overwriting the unreadable data file.
      *
-     * @param filePath location of the task data file
+     * @param filePath location of the task data file.
      */
     public Meka(String filePath) {
         ui = new Ui();
@@ -84,7 +84,7 @@ public class Meka {
     /**
      * Starts MEKA using its default task data file.
      *
-     * @param args command-line arguments; not used
+     * @param args command-line arguments; not used.
      */
     public static void main(String[] args) {
         new Meka("data/meka.txt").run();

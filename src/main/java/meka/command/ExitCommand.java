@@ -9,11 +9,17 @@ import meka.ui.Ui;
  */
 public class ExitCommand extends Command {
     /**
+     * Creates a command that ends the current session.
+     */
+    public ExitCommand() {
+    }
+
+    /**
      * Shows MEKA's goodbye message.
      *
-     * @param tasks current task list; not modified
-     * @param ui user interface through which the message is displayed
-     * @param storage current storage component; not used
+     * @param tasks current task list; not modified.
+     * @param ui user interface through which the message is displayed.
+     * @param storage current storage component; not used.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
@@ -23,7 +29,7 @@ public class ExitCommand extends Command {
     /**
      * Indicates that this command ends MEKA.
      *
-     * @return true
+     * @return true.
      */
     @Override
     public boolean isExit() {
