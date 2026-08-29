@@ -18,7 +18,7 @@ public class MarkCommand extends Command {
     /**
      * Creates a command that marks the specified task.
      *
-     * @param taskNumber one-based task number
+     * @param taskNumber one-based task number.
      */
     public MarkCommand(int taskNumber) {
         this.taskNumber = taskNumber;
@@ -27,11 +27,11 @@ public class MarkCommand extends Command {
     /**
      * Marks and saves the task, then shows confirmation.
      *
-     * @param tasks task list containing the task
-     * @param ui user interface through which confirmation is displayed
-     * @param storage storage component used to persist the change
-     * @throws MekaException if the task number does not exist
-     * @throws IOException if the updated task list cannot be saved
+     * @param tasks task list containing the task.
+     * @param ui user interface through which confirmation is displayed.
+     * @param storage storage component used to persist the change.
+     * @throws MekaException if the task number does not exist.
+     * @throws IOException if the updated task list cannot be saved.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage)

@@ -9,11 +9,17 @@ import meka.ui.Ui;
  */
 public class ListCommand extends Command {
     /**
+     * Creates a command that displays the task list.
+     */
+    public ListCommand() {
+    }
+
+    /**
      * Shows the current task list without modifying it.
      *
-     * @param tasks task list to display
-     * @param ui user interface through which tasks are displayed
-     * @param storage current storage component; not used
+     * @param tasks task list to display.
+     * @param ui user interface through which tasks are displayed.
+     * @param storage current storage component; not used.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {

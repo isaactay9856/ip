@@ -21,9 +21,9 @@ public class Event extends Task {
     /**
      * Creates an event task.
      *
-     * @param description description of the event
-     * @param from start date and time of the event
-     * @param to end date and time of the event
+     * @param description description of the event.
+     * @param from start date and time of the event.
+     * @param to end date and time of the event.
      */
     public Event(String description, LocalDateTime from, LocalDateTime to) {
         super(description);
@@ -37,7 +37,7 @@ public class Event extends Task {
      * Both date-times use the ISO local date-time format so they can be parsed
      * reliably when MEKA starts again.
      *
-     * @return the task type, completion status, description, and ISO range
+     * @return the task type, completion status, description, and ISO range.
      */
     @Override
     public String toDataString() {
@@ -48,7 +48,7 @@ public class Event extends Task {
      * Returns the event with its type, completion status, and time range.
      *
      * @return the task formatted as "[E][ ] description
-     *         (from: MMM dd yyyy, h:mm a to: MMM dd yyyy, h:mm a)"
+     *         (from: MMM dd yyyy, h:mm a to: MMM dd yyyy, h:mm a)".
      */
     @Override
     public String toString() {
