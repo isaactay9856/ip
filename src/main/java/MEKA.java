@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Scanner;
 
@@ -26,8 +25,6 @@ public class MEKA {
     private static final String INVALID_DATE_TIME_MESSAGE =
             "Please enter date and time as d/M/yyyy HHmm "
                     + "(for example, 2/12/2019 1800).";
-    private static final String INVALID_TASK_NUMBER_MESSAGE =
-            "The task number does not exist in the list.";
     private static final String RESERVED_DELIMITER_MESSAGE =
             "Task details cannot contain \" | \" because it is reserved for saved data.";
     private static final String LOAD_ERROR_MESSAGE =
@@ -59,12 +56,12 @@ public class MEKA {
 
         String separator = "____________________________________________________________";
         Storage storage = new Storage(Path.of("data", "meka.txt"));
-        ArrayList<Task> tasks;
+        TaskList tasks;
         boolean storageAvailable = true;
         try {
             tasks = storage.load();
         } catch (DataFileException | IOException | SecurityException exception) {
-            tasks = new ArrayList<>();
+            tasks = new TaskList();
             storageAvailable = false;
         }
 
@@ -92,13 +89,15 @@ public class MEKA {
             System.out.println(separator);
             try {
                 if (command.equals("list")) {
-                    for (int i = 0; i < tasks.size(); i++) {
-                        System.out.println(" " + (i + 1) + ". " + tasks.get(i));
+                    int taskNumber = 1;
+                    for (Task task : tasks) {
+                        System.out.println(" " + taskNumber + ". " + task);
+                        taskNumber++;
                     }
 
                 } else if (isCommand(command, "mark")) {
                     int taskNumber = parseTaskNumber(command, "mark");
-                    Task task = getTask(tasks, taskNumber);
+                    Task task = tasks.get(taskNumber);
                     task.markAsDone();
                     saveTasks(storage, tasks, storageAvailable);
                     System.out.println(" Nice! I've marked this task as done:");
@@ -106,7 +105,7 @@ public class MEKA {
 
                 } else if (isCommand(command, "unmark")) {
                     int taskNumber = parseTaskNumber(command, "unmark");
-                    Task task = getTask(tasks, taskNumber);
+                    Task task = tasks.get(taskNumber);
                     task.unmark();
                     saveTasks(storage, tasks, storageAvailable);
                     System.out.println(" OK, I've marked this task as not done yet:");
@@ -114,8 +113,7 @@ public class MEKA {
 
                 } else if (isCommand(command, "delete")) {
                     int taskNumber = parseTaskNumber(command, "delete");
-                    getTask(tasks, taskNumber);
-                    Task task = tasks.remove(taskNumber - 1);
+                    Task task = tasks.delete(taskNumber);
                     saveTasks(storage, tasks, storageAvailable);
                     System.out.println(" Noted. I've removed this task:");
                     System.out.println("   " + task);
@@ -249,21 +247,6 @@ public class MEKA {
     }
 
     /**
-     * Returns an existing task selected by its one-based task number.
-     *
-     * @param tasks current task list
-     * @param taskNumber one-based task number supplied by the user
-     * @return the selected task
-     * @throws MekaException if the number is outside the task list
-     */
-    private static Task getTask(ArrayList<Task> tasks, int taskNumber) throws MekaException {
-        if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw new MekaException(INVALID_TASK_NUMBER_MESSAGE);
-        }
-        return tasks.get(taskNumber - 1);
-    }
-
-    /**
      * Extracts and validates a task description from a task creation command.
      *
      * @param input complete user input
@@ -337,7 +320,7 @@ public class MEKA {
      * @param storageAvailable whether loading or an earlier save succeeded
      * @throws IOException if storage is unavailable or the data file cannot be written
      */
-    private static void saveTasks(Storage storage, ArrayList<Task> tasks,
+    private static void saveTasks(Storage storage, TaskList tasks,
             boolean storageAvailable)
             throws IOException {
         if (!storageAvailable) {

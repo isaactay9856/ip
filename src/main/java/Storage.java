@@ -28,10 +28,10 @@ public class Storage {
      * @throws IOException if the data file cannot be read
      * @throws DataFileException if the data file contains an invalid record
      */
-    public ArrayList<Task> load() throws IOException, DataFileException {
+    public TaskList load() throws IOException, DataFileException {
         ArrayList<Task> tasks = new ArrayList<>();
         if (Files.notExists(filePath)) {
-            return tasks;
+            return new TaskList(tasks);
         }
 
         int lineNumber = 0;
@@ -45,16 +45,16 @@ public class Storage {
                 tasks.add(parseTask(line, lineNumber));
             }
         }
-        return tasks;
+        return new TaskList(tasks);
     }
 
     /**
      * Saves all current tasks to the data file.
      *
-     * @param tasks tasks to save
+     * @param tasks task list to save
      * @throws IOException if the data directory or file cannot be written
      */
-    public void save(ArrayList<Task> tasks) throws IOException {
+    public void save(TaskList tasks) throws IOException {
         Files.createDirectories(filePath.getParent());
 
         ArrayList<String> taskData = new ArrayList<>();
