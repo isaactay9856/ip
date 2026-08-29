@@ -5,7 +5,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.Locale;
-import java.util.Scanner;
 
 /**
  * Console chatbot for creating, updating, deleting, and persistently storing
@@ -27,10 +26,6 @@ public class MEKA {
                     + "(for example, 2/12/2019 1800).";
     private static final String RESERVED_DELIMITER_MESSAGE =
             "Task details cannot contain \" | \" because it is reserved for saved data.";
-    private static final String LOAD_ERROR_MESSAGE =
-            "I could not load the saved tasks, so I started with an empty task list.";
-    private static final String SAVE_ERROR_MESSAGE =
-            "I could not save the task list. Your changes are available only for this session.";
     private static final String UNKNOWN_COMMAND_MESSAGE =
             "I do not understand this command. Please input a valid command.";
 
@@ -47,14 +42,7 @@ public class MEKA {
      * @param args command-line arguments; not used
      */
     public static void main(String[] args) {
-        String banner = "███╗   ███╗███████╗██╗  ██╗ █████╗\n"
-                + "████╗ ████║██╔════╝██║ ██╔╝██╔══██╗\n"
-                + "██╔████╔██║█████╗  █████╔╝ ███████║\n"
-                + "██║╚██╔╝██║██╔══╝  ██╔═██╗ ██╔══██║\n"
-                + "██║ ╚═╝ ██║███████╗██║  ██╗██║  ██║\n"
-                + "╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝\n";
-
-        String separator = "____________________________________________________________";
+        Ui ui = new Ui();
         Storage storage = new Storage(Path.of("data", "meka.txt"));
         TaskList tasks;
         boolean storageAvailable = true;
@@ -65,66 +53,51 @@ public class MEKA {
             storageAvailable = false;
         }
 
-        System.out.println(separator);
-        System.out.println(banner);
-        System.out.println(" Hello! I'm MEKA.");
-        System.out.println(" What can I do for you?");
+        ui.showWelcome();
         if (!storageAvailable) {
-            System.out.println(" " + LOAD_ERROR_MESSAGE);
+            ui.showLoadingError();
         }
-        System.out.println(separator);
+        ui.showLine();
 
-        Scanner scanner = new Scanner(System.in);
-        while (scanner.hasNextLine()) {
-            String command = scanner.nextLine().trim();
+        while (ui.hasNextCommand()) {
+            String command = ui.readCommand();
 
             if (command.equals("bye")) {
-                System.out.println(separator);
-
-                System.out.println(" Bye. Hope to see you again soon!");
-                System.out.println(separator);
+                ui.showGoodbye();
                 break;
             }
 
-            System.out.println(separator);
+            ui.showLine();
             try {
                 if (command.equals("list")) {
-                    int taskNumber = 1;
-                    for (Task task : tasks) {
-                        System.out.println(" " + taskNumber + ". " + task);
-                        taskNumber++;
-                    }
+                    ui.showTaskList(tasks);
 
                 } else if (isCommand(command, "mark")) {
                     int taskNumber = parseTaskNumber(command, "mark");
                     Task task = tasks.get(taskNumber);
                     task.markAsDone();
                     saveTasks(storage, tasks, storageAvailable);
-                    System.out.println(" Nice! I've marked this task as done:");
-                    System.out.println("   " + task);
+                    ui.showTaskMarked(task);
 
                 } else if (isCommand(command, "unmark")) {
                     int taskNumber = parseTaskNumber(command, "unmark");
                     Task task = tasks.get(taskNumber);
                     task.unmark();
                     saveTasks(storage, tasks, storageAvailable);
-                    System.out.println(" OK, I've marked this task as not done yet:");
-                    System.out.println("   " + task);
+                    ui.showTaskUnmarked(task);
 
                 } else if (isCommand(command, "delete")) {
                     int taskNumber = parseTaskNumber(command, "delete");
                     Task task = tasks.delete(taskNumber);
                     saveTasks(storage, tasks, storageAvailable);
-                    System.out.println(" Noted. I've removed this task:");
-                    System.out.println("   " + task);
-                    System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+                    ui.showTaskDeleted(task, tasks.size());
 
                 } else if (isCommand(command, "todo")) {
                     String description = parseDescription(command, "todo");
                     Task task = new Todo(description);
                     tasks.add(task);
                     saveTasks(storage, tasks, storageAvailable);
-                    printTaskAdded(task, tasks.size());
+                    ui.showTaskAdded(task, tasks.size());
 
                 } else if (isCommand(command, "deadline")) {
                     int byIndex = findArgumentMarker(command, "by");
@@ -140,7 +113,7 @@ public class MEKA {
                     Task task = new Deadline(description, parseDateTime(by));
                     tasks.add(task);
                     saveTasks(storage, tasks, storageAvailable);
-                    printTaskAdded(task, tasks.size());
+                    ui.showTaskAdded(task, tasks.size());
 
                 } else if (isCommand(command, "event")) {
                     int fromIndex = findArgumentMarker(command, "from");
@@ -162,20 +135,20 @@ public class MEKA {
                             parseDateTime(from), parseDateTime(to));
                     tasks.add(task);
                     saveTasks(storage, tasks, storageAvailable);
-                    printTaskAdded(task, tasks.size());
+                    ui.showTaskAdded(task, tasks.size());
 
                 } else {
                     throw new MekaException(UNKNOWN_COMMAND_MESSAGE);
                 }
             } catch (MekaException exception) {
-                System.out.println(" " + exception.getMessage());
+                ui.showError(exception.getMessage());
             } catch (NumberFormatException exception) {
-                System.out.println(" " + NUMBER_REQUIRED_MESSAGE);
+                ui.showError(NUMBER_REQUIRED_MESSAGE);
             } catch (IOException | SecurityException exception) {
                 storageAvailable = false;
-                System.out.println(" " + SAVE_ERROR_MESSAGE);
+                ui.showSavingError();
             }
-            System.out.println(separator);
+            ui.showLine();
         }
     }
 
@@ -329,15 +302,4 @@ public class MEKA {
         storage.save(tasks);
     }
 
-    /**
-     * Prints a confirmation after a task has been added to the list.
-     *
-     * @param task task that was added
-     * @param taskCount current number of tasks in the list
-     */
-    private static void printTaskAdded(Task task, int taskCount) {
-        System.out.println(" Got it. I've added this task:");
-        System.out.println("   " + task);
-        System.out.println(" Now you have " + taskCount + " tasks in the list.");
-    }
 }
