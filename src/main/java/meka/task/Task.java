@@ -1,5 +1,7 @@
 package meka.task;
 
+import java.util.Locale;
+
 /**
  * Represents a task and whether it has been completed.
  */
@@ -34,6 +36,18 @@ public class Task {
      */
     public String getStatusIcon() {
         return isDone ? "X" : " ";
+    }
+
+    /**
+     * Returns whether this task's description contains the given keyword,
+     * ignoring letter case.
+     *
+     * @param keyword keyword to search for.
+     * @return true if the description contains the keyword.
+     */
+    public boolean containsKeyword(String keyword) {
+        return description.toLowerCase(Locale.ENGLISH)
+                .contains(keyword.toLowerCase(Locale.ENGLISH));
     }
 
     /**

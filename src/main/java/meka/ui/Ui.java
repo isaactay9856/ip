@@ -94,6 +94,16 @@ public class Ui {
     }
 
     /**
+     * Shows search results with consecutive task numbers.
+     *
+     * @param matches Matching tasks in their original order.
+     */
+    public void showMatchingTasks(TaskList matches) {
+        System.out.println(" Here are the matching tasks in your list:");
+        showTaskList(matches);
+    }
+
+    /**
      * Shows confirmation that a task was added.
      *
      * @param task task that was added.

@@ -10,6 +10,7 @@ import meka.command.AddCommand;
 import meka.command.Command;
 import meka.command.DeleteCommand;
 import meka.command.ExitCommand;
+import meka.command.FindCommand;
 import meka.command.ListCommand;
 import meka.command.MarkCommand;
 import meka.command.UnmarkCommand;
@@ -78,6 +79,9 @@ public class Parser {
         }
         if (input.equals("list")) {
             return new ListCommand();
+        }
+        if (isCommand(input, "find")) {
+            return new FindCommand(parseDescription(input, "find"));
         }
         if (isCommand(input, "mark")) {
             return new MarkCommand(parseTaskNumber(input, "mark"));

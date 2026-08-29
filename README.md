@@ -104,6 +104,22 @@ Dec 02 2019, 6:00 PM
 Invalid values such as `29/2/2019 1800` or `2/12/2019 2500` are rejected.
 Saved date-times use the ISO form `2019-12-02T18:00` for reliable parsing.
 
+### Level 9: Find tasks
+
+Find tasks whose descriptions contain a keyword:
+
+```text
+find book
+```
+
+The search ignores letter case and numbers only the matching tasks:
+
+```text
+Here are the matching tasks in your list:
+1. [T][X] read book
+2. [D][X] return book (by: Jun 06 2019, 6:00 PM)
+```
+
 ## Command summary
 
 | Command | Purpose |
@@ -112,6 +128,7 @@ Saved date-times use the ISO form `2019-12-02T18:00` for reliable parsing.
 | `deadline DESCRIPTION /by DATE_TIME` | Add a deadline |
 | `event DESCRIPTION /from DATE_TIME /to DATE_TIME` | Add an event |
 | `list` | Show all tasks |
+| `find KEYWORD` | Show tasks whose descriptions contain a keyword |
 | `mark NUMBER` | Mark a task as complete |
 | `unmark NUMBER` | Mark a task as incomplete |
 | `delete NUMBER` | Delete a task |
