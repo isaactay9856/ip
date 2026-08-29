@@ -1,20 +1,35 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Scanner;
 
 /**
- * A simple chatbot that stores tasks, lists them, and exits when the user says goodbye.
+ * Console chatbot for creating, updating, deleting, and persistently storing
+ * todo, deadline, and event tasks.
  */
 public class MEKA {
+    /** Location of the task data file relative to the working directory. */
     private static final Path DATA_FILE = Path.of("data", "meka.txt");
+
+    /** Strict parser for user-entered date-times such as {@code 2/12/2019 1800}. */
+    private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT =
+            DateTimeFormatter.ofPattern("d/M/uuuu HHmm", Locale.ENGLISH)
+                    .withResolverStyle(ResolverStyle.STRICT);
     private static final String NUMBER_REQUIRED_MESSAGE =
             "The following command requires a number to proceed.";
     private static final String DESCRIPTION_REQUIRED_MESSAGE =
             "The following command requires a task description to proceed.";
     private static final String DATE_TIME_REQUIRED_MESSAGE =
             "The following command requires date/time details to proceed.";
+    private static final String INVALID_DATE_TIME_MESSAGE =
+            "Please enter date and time as d/M/yyyy HHmm "
+                    + "(for example, 2/12/2019 1800).";
     private static final String INVALID_TASK_NUMBER_MESSAGE =
             "The task number does not exist in the list.";
     private static final String RESERVED_DELIMITER_MESSAGE =
@@ -26,6 +41,18 @@ public class MEKA {
     private static final String UNKNOWN_COMMAND_MESSAGE =
             "I do not understand this command. Please input a valid command.";
 
+    /**
+     * Prevents construction because MEKA is started through {@link #main(String[])}.
+     */
+    private MEKA() {
+    }
+
+    /**
+     * Starts MEKA, loads saved tasks, and processes commands until input ends
+     * or the user enters {@code bye}.
+     *
+     * @param args command-line arguments; not used
+     */
     public static void main(String[] args) {
         String banner = "███╗   ███╗███████╗██╗  ██╗ █████╗\n"
                 + "████╗ ████║██╔════╝██║ ██╔╝██╔══██╗\n"
@@ -115,7 +142,7 @@ public class MEKA {
                     }
                     String by = command.substring(byIndex + " /by".length()).trim();
                     requireDateTime(by);
-                    Task task = new Deadline(description, by);
+                    Task task = new Deadline(description, parseDateTime(by));
                     tasks.add(task);
                     saveTasks(tasks, storageAvailable);
                     printTaskAdded(task, tasks.size());
@@ -136,7 +163,8 @@ public class MEKA {
                     String to = command.substring(toIndex + " /to".length()).trim();
                     requireDateTime(from);
                     requireDateTime(to);
-                    Task task = new Event(description, from, to);
+                    Task task = new Event(description,
+                            parseDateTime(from), parseDateTime(to));
                     tasks.add(task);
                     saveTasks(tasks, storageAvailable);
                     printTaskAdded(task, tasks.size());
@@ -207,7 +235,7 @@ public class MEKA {
     }
 
     /**
-     * Extracts a task number from a mark or unmark command.
+     * Extracts a task number from a mark, unmark, or delete command.
      *
      * @param input complete user input
      * @param command command word at the start of the input
@@ -263,13 +291,28 @@ public class MEKA {
     }
 
     /**
-     * Ensures a date or time argument is present and can be saved safely.
+     * Ensures a date-time argument is present and can be saved safely.
      *
-     * @param dateTime date or time text to validate
+     * @param dateTime date and time text to validate
      * @throws MekaException if the value is empty or contains the file delimiter
      */
     private static void requireDateTime(String dateTime) throws MekaException {
         requireStorableText(dateTime, DATE_TIME_REQUIRED_MESSAGE);
+    }
+
+    /**
+     * Parses a user-entered date and time in the {@code d/M/yyyy HHmm} format.
+     *
+     * @param dateTime date and time text supplied by the user
+     * @return the parsed date and time
+     * @throws MekaException if the text is not a valid date and time
+     */
+    private static LocalDateTime parseDateTime(String dateTime) throws MekaException {
+        try {
+            return LocalDateTime.parse(dateTime, INPUT_DATE_TIME_FORMAT);
+        } catch (DateTimeParseException exception) {
+            throw new MekaException(INVALID_DATE_TIME_MESSAGE);
+        }
     }
 
     /**
@@ -317,7 +360,8 @@ public class MEKA {
     }
 
     /**
-     * Converts one saved data line back into its corresponding task object.
+     * Converts one saved data line back into its corresponding task object,
+     * including parsing saved deadline and event values as ISO date-times.
      *
      * @param line pipe-separated task data
      * @param lineNumber line number used to identify invalid data
@@ -360,18 +404,23 @@ public class MEKA {
 
         Task task;
 
-        switch (fields[0]) {
-        case "T":
-            task = new Todo(fields[2]);
-            break;
-        case "D":
-            task = new Deadline(fields[2], fields[3]);
-            break;
-        case "E":
-            task = new Event(fields[2], fields[3], fields[4]);
-            break;
-        default:
-            throw invalidData(lineNumber, "unknown task type");
+        try {
+            switch (fields[0]) {
+            case "T":
+                task = new Todo(fields[2]);
+                break;
+            case "D":
+                task = new Deadline(fields[2], LocalDateTime.parse(fields[3]));
+                break;
+            case "E":
+                task = new Event(fields[2], LocalDateTime.parse(fields[3]),
+                        LocalDateTime.parse(fields[4]));
+                break;
+            default:
+                throw invalidData(lineNumber, "unknown task type");
+            }
+        } catch (DateTimeParseException exception) {
+            throw invalidData(lineNumber, "invalid date and time");
         }
 
         if (fields[1].equals("1")) {

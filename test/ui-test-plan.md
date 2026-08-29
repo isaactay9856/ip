@@ -19,8 +19,8 @@ This file records console UI test cases for the project. Run test cases in the l
 
 ```text
 todo borrow book
-deadline return book /by Sunday
-event project meeting /from Mon 2pm /to 4pm
+deadline return book /by 2/12/2019 1800
+event project meeting /from 3/12/2019 0900 /to 4/12/2019 1730
 list
 bye
 ```
@@ -46,18 +46,18 @@ ____________________________________________________________
 ____________________________________________________________
 ____________________________________________________________
  Got it. I've added this task:
-   [D][ ] return book (by: Sunday)
+   [D][ ] return book (by: Dec 02 2019, 6:00 PM)
  Now you have 2 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
  Got it. I've added this task:
-   [E][ ] project meeting (from: Mon 2pm to: 4pm)
+   [E][ ] project meeting (from: Dec 03 2019, 9:00 AM to: Dec 04 2019, 5:30 PM)
  Now you have 3 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
  1. [T][ ] borrow book
- 2. [D][ ] return book (by: Sunday)
- 3. [E][ ] project meeting (from: Mon 2pm to: 4pm)
+ 2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
+ 3. [E][ ] project meeting (from: Dec 03 2019, 9:00 AM to: Dec 04 2019, 5:30 PM)
 ____________________________________________________________
 ____________________________________________________________
  Bye. Hope to see you again soon!
@@ -68,8 +68,8 @@ ____________________________________________________________
 
 ```text
 T | 0 | borrow book
-D | 0 | return book | Sunday
-E | 0 | project meeting | Mon 2pm | 4pm
+D | 0 | return book | 2019-12-02T18:00
+E | 0 | project meeting | 2019-12-03T09:00 | 2019-12-04T17:30
 ```
 
 ### UI-02: Reject invalid commands without changing task state
@@ -85,10 +85,10 @@ todo second task
 mark one
 mark 1
 unmark
-deadline /by Sunday
-event team sync /from 2pm /to 3pm
+deadline /by 2/12/2019 1800
+event team sync /from 3/12/2019 0900 /to 4/12/2019 1730
 unmark none
-event /from 4pm /to 5pm
+event /from 4/12/2019 0900 /to 5/12/2019 1730
 dance
 list
 bye
@@ -139,7 +139,7 @@ ____________________________________________________________
 ____________________________________________________________
 ____________________________________________________________
  Got it. I've added this task:
-   [E][ ] team sync (from: 2pm to: 3pm)
+   [E][ ] team sync (from: Dec 03 2019, 9:00 AM to: Dec 04 2019, 5:30 PM)
  Now you have 3 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
@@ -154,7 +154,7 @@ ____________________________________________________________
 ____________________________________________________________
  1. [T][X] first task
  2. [T][ ] second task
- 3. [E][ ] team sync (from: 2pm to: 3pm)
+ 3. [E][ ] team sync (from: Dec 03 2019, 9:00 AM to: Dec 04 2019, 5:30 PM)
 ____________________________________________________________
 ____________________________________________________________
  Bye. Hope to see you again soon!
@@ -166,7 +166,7 @@ ____________________________________________________________
 ```text
 T | 1 | first task
 T | 0 | second task
-E | 0 | team sync | 2pm | 3pm
+E | 0 | team sync | 2019-12-03T09:00 | 2019-12-04T17:30
 ```
 
 ### UI-03: Mark and unmark a valid task
@@ -230,8 +230,8 @@ T | 0 | reversible task
 
 ```text
 todo borrow book
-deadline return book /by Sunday
-event project meeting /from Mon 2pm /to 4pm
+deadline return book /by 2/12/2019 1800
+event project meeting /from 3/12/2019 0900 /to 4/12/2019 1730
 delete 99
 delete 2
 list
@@ -259,12 +259,12 @@ ____________________________________________________________
 ____________________________________________________________
 ____________________________________________________________
  Got it. I've added this task:
-   [D][ ] return book (by: Sunday)
+   [D][ ] return book (by: Dec 02 2019, 6:00 PM)
  Now you have 2 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
  Got it. I've added this task:
-   [E][ ] project meeting (from: Mon 2pm to: 4pm)
+   [E][ ] project meeting (from: Dec 03 2019, 9:00 AM to: Dec 04 2019, 5:30 PM)
  Now you have 3 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
@@ -272,12 +272,12 @@ ____________________________________________________________
 ____________________________________________________________
 ____________________________________________________________
  Noted. I've removed this task:
-   [D][ ] return book (by: Sunday)
+   [D][ ] return book (by: Dec 02 2019, 6:00 PM)
  Now you have 2 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
  1. [T][ ] borrow book
- 2. [E][ ] project meeting (from: Mon 2pm to: 4pm)
+ 2. [E][ ] project meeting (from: Dec 03 2019, 9:00 AM to: Dec 04 2019, 5:30 PM)
 ____________________________________________________________
 ____________________________________________________________
  Bye. Hope to see you again soon!
@@ -288,7 +288,7 @@ ____________________________________________________________
 
 ```text
 T | 0 | borrow book
-E | 0 | project meeting | Mon 2pm | 4pm
+E | 0 | project meeting | 2019-12-03T09:00 | 2019-12-04T17:30
 ```
 
 ### UI-05: Load saved tasks on startup
@@ -318,8 +318,8 @@ ____________________________________________________________
 ____________________________________________________________
 ____________________________________________________________
  1. [T][X] read book
- 2. [D][ ] return book (by: June 6th)
- 3. [E][X] project meeting (from: Aug 6th 2pm to: 4pm)
+ 2. [D][ ] return book (by: Jun 06 2019, 6:00 PM)
+ 3. [E][X] project meeting (from: Aug 06 2019, 2:00 PM to: Aug 06 2019, 4:00 PM)
 ____________________________________________________________
 ____________________________________________________________
  Bye. Hope to see you again soon!
@@ -330,13 +330,13 @@ ____________________________________________________________
 
 ```text
 T | 1 | read book
-D | 0 | return book | June 6th
-E | 1 | project meeting | Aug 6th 2pm | 4pm
+D | 0 | return book | 2019-06-06T18:00
+E | 1 | project meeting | 2019-08-06T14:00 | 2019-08-06T16:00
 ```
 
-### UI-06: Reject task details that cannot be saved
+### UI-06: Reject invalid task details
 
-- **Aim:** Verify that missing date/time details and the reserved file delimiter are rejected without changing the task list or data file.
+- **Aim:** Verify that missing date-times, invalid date-times, and the reserved file delimiter are rejected without changing the task list or data file.
 - **Inputs (in order):**
 
 ```text
@@ -345,6 +345,9 @@ event team meeting /from /to 4pm
 event team meeting /from 2pm /to
 todo left | right
 deadline clean room /by next | week
+deadline submit report /by 29/2/2019 1800
+deadline submit report /by 2/12/2019 2500
+event conference /from 1/12/2019 0900 /to 2/12/2019
 todo valid task
 list
 bye
@@ -378,6 +381,15 @@ ____________________________________________________________
 ____________________________________________________________
 ____________________________________________________________
  Task details cannot contain " | " because it is reserved for saved data.
+____________________________________________________________
+____________________________________________________________
+ Please enter date and time as d/M/yyyy HHmm (for example, 2/12/2019 1800).
+____________________________________________________________
+____________________________________________________________
+ Please enter date and time as d/M/yyyy HHmm (for example, 2/12/2019 1800).
+____________________________________________________________
+____________________________________________________________
+ Please enter date and time as d/M/yyyy HHmm (for example, 2/12/2019 1800).
 ____________________________________________________________
 ____________________________________________________________
  Got it. I've added this task:
