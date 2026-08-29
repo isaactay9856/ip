@@ -1,5 +1,4 @@
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -14,9 +13,6 @@ import java.util.Scanner;
  * todo, deadline, and event tasks.
  */
 public class MEKA {
-    /** Location of the task data file relative to the working directory. */
-    private static final Path DATA_FILE = Path.of("data", "meka.txt");
-
     /** Strict parser for user-entered date-times such as {@code 2/12/2019 1800}. */
     private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT =
             DateTimeFormatter.ofPattern("d/M/uuuu HHmm", Locale.ENGLISH)
@@ -62,10 +58,11 @@ public class MEKA {
                 + "╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝\n";
 
         String separator = "____________________________________________________________";
+        Storage storage = new Storage(Path.of("data", "meka.txt"));
         ArrayList<Task> tasks;
         boolean storageAvailable = true;
         try {
-            tasks = loadTasks();
+            tasks = storage.load();
         } catch (DataFileException | IOException | SecurityException exception) {
             tasks = new ArrayList<>();
             storageAvailable = false;
@@ -103,7 +100,7 @@ public class MEKA {
                     int taskNumber = parseTaskNumber(command, "mark");
                     Task task = getTask(tasks, taskNumber);
                     task.markAsDone();
-                    saveTasks(tasks, storageAvailable);
+                    saveTasks(storage, tasks, storageAvailable);
                     System.out.println(" Nice! I've marked this task as done:");
                     System.out.println("   " + task);
 
@@ -111,7 +108,7 @@ public class MEKA {
                     int taskNumber = parseTaskNumber(command, "unmark");
                     Task task = getTask(tasks, taskNumber);
                     task.unmark();
-                    saveTasks(tasks, storageAvailable);
+                    saveTasks(storage, tasks, storageAvailable);
                     System.out.println(" OK, I've marked this task as not done yet:");
                     System.out.println("   " + task);
 
@@ -119,7 +116,7 @@ public class MEKA {
                     int taskNumber = parseTaskNumber(command, "delete");
                     getTask(tasks, taskNumber);
                     Task task = tasks.remove(taskNumber - 1);
-                    saveTasks(tasks, storageAvailable);
+                    saveTasks(storage, tasks, storageAvailable);
                     System.out.println(" Noted. I've removed this task:");
                     System.out.println("   " + task);
                     System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
@@ -128,7 +125,7 @@ public class MEKA {
                     String description = parseDescription(command, "todo");
                     Task task = new Todo(description);
                     tasks.add(task);
-                    saveTasks(tasks, storageAvailable);
+                    saveTasks(storage, tasks, storageAvailable);
                     printTaskAdded(task, tasks.size());
 
                 } else if (isCommand(command, "deadline")) {
@@ -144,7 +141,7 @@ public class MEKA {
                     requireDateTime(by);
                     Task task = new Deadline(description, parseDateTime(by));
                     tasks.add(task);
-                    saveTasks(tasks, storageAvailable);
+                    saveTasks(storage, tasks, storageAvailable);
                     printTaskAdded(task, tasks.size());
 
                 } else if (isCommand(command, "event")) {
@@ -166,7 +163,7 @@ public class MEKA {
                     Task task = new Event(description,
                             parseDateTime(from), parseDateTime(to));
                     tasks.add(task);
-                    saveTasks(tasks, storageAvailable);
+                    saveTasks(storage, tasks, storageAvailable);
                     printTaskAdded(task, tasks.size());
 
                 } else {
@@ -333,132 +330,20 @@ public class MEKA {
     }
 
     /**
-     * Loads saved tasks from the application's data file.
+     * Saves all current tasks when the storage component is available.
      *
-     * @return the saved tasks, or an empty list if the data file does not exist
-     * @throws IOException if the data file cannot be read
-     * @throws DataFileException if the data file contains an invalid record
-     */
-    private static ArrayList<Task> loadTasks() throws IOException, DataFileException {
-        ArrayList<Task> tasks = new ArrayList<>();
-        if (Files.notExists(DATA_FILE)) {
-            return tasks;
-        }
-
-        int lineNumber = 0;
-        for (String originalLine : Files.readAllLines(DATA_FILE)) {
-            lineNumber++;
-            String line = originalLine;
-            if (lineNumber == 1 && line.startsWith("\uFEFF")) {
-                line = line.substring(1);
-            }
-            if (!line.isBlank()) {
-                tasks.add(parseSavedTask(line, lineNumber));
-            }
-        }
-        return tasks;
-    }
-
-    /**
-     * Converts one saved data line back into its corresponding task object,
-     * including parsing saved deadline and event values as ISO date-times.
-     *
-     * @param line pipe-separated task data
-     * @param lineNumber line number used to identify invalid data
-     * @return the reconstructed task
-     * @throws DataFileException if the line contains invalid task data
-     */
-    private static Task parseSavedTask(String line, int lineNumber)
-            throws DataFileException {
-        String[] fields = line.split(" \\| ", -1);
-        if (fields.length < 1) {
-            throw invalidData(lineNumber, "missing task type");
-        }
-
-        int expectedFieldCount;
-        switch (fields[0]) {
-        case "T":
-            expectedFieldCount = 3;
-            break;
-        case "D":
-            expectedFieldCount = 4;
-            break;
-        case "E":
-            expectedFieldCount = 5;
-            break;
-        default:
-            throw invalidData(lineNumber, "unknown task type");
-        }
-
-        if (fields.length != expectedFieldCount) {
-            throw invalidData(lineNumber, "incorrect number of fields");
-        }
-        if (!fields[1].equals("0") && !fields[1].equals("1")) {
-            throw invalidData(lineNumber, "invalid completion status");
-        }
-        for (int i = 2; i < fields.length; i++) {
-            if (fields[i].isBlank()) {
-                throw invalidData(lineNumber, "empty task detail");
-            }
-        }
-
-        Task task;
-
-        try {
-            switch (fields[0]) {
-            case "T":
-                task = new Todo(fields[2]);
-                break;
-            case "D":
-                task = new Deadline(fields[2], LocalDateTime.parse(fields[3]));
-                break;
-            case "E":
-                task = new Event(fields[2], LocalDateTime.parse(fields[3]),
-                        LocalDateTime.parse(fields[4]));
-                break;
-            default:
-                throw invalidData(lineNumber, "unknown task type");
-            }
-        } catch (DateTimeParseException exception) {
-            throw invalidData(lineNumber, "invalid date and time");
-        }
-
-        if (fields[1].equals("1")) {
-            task.markAsDone();
-        }
-        return task;
-    }
-
-    /**
-     * Creates a data-file exception that identifies the invalid line.
-     *
-     * @param lineNumber one-based line number
-     * @param reason reason the record is invalid
-     * @return an exception describing the invalid data
-     */
-    private static DataFileException invalidData(int lineNumber, String reason) {
-        return new DataFileException("Invalid data on line " + lineNumber + ": " + reason);
-    }
-
-    /**
-     * Saves all current tasks to the application's data file.
-     *
+     * @param storage storage component that writes the data file
      * @param tasks tasks to save
      * @param storageAvailable whether loading or an earlier save succeeded
-     * @throws IOException if the data directory or file cannot be written
+     * @throws IOException if storage is unavailable or the data file cannot be written
      */
-    private static void saveTasks(ArrayList<Task> tasks, boolean storageAvailable)
+    private static void saveTasks(Storage storage, ArrayList<Task> tasks,
+            boolean storageAvailable)
             throws IOException {
         if (!storageAvailable) {
             throw new IOException("Task storage is unavailable");
         }
-        Files.createDirectories(DATA_FILE.getParent());
-
-        ArrayList<String> taskData = new ArrayList<>();
-        for (Task task : tasks) {
-            taskData.add(task.toDataString());
-        }
-        Files.write(DATA_FILE, taskData);
+        storage.save(tasks);
     }
 
     /**
