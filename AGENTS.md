@@ -48,6 +48,10 @@ Changes limited to documentation, agent instructions, skill definitions, or othe
 
 ## Git
 
+For every future commit-message proposal, commit creation, branch creation, branch rename, or review of
+Git naming, invoke and follow the project-specific `seedu-git-standard` skill. All future commits must
+follow the SE-EDU Git conventions encoded by that skill.
+
 Use lightweight tags unless the user requests an annotated tag.
 When proposing or creating a commit message, include enough detail to explain the rationale for the change.
 Do not commit or push unless explicitly asked.
