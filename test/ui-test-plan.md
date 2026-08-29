@@ -4,8 +4,8 @@ This file records console UI test cases for the project. Run test cases in the l
 
 ## Program setup
 
-- **Compile command:** `javac -encoding UTF-8 -d out (Get-ChildItem src/main/java -Recurse -Filter *.java).FullName` using Java 25 in PowerShell
-- **Run command:** `java -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -cp out meka.Meka` using Java 25
+- **Compile command:** `./gradlew classes` using Java 25 in PowerShell
+- **Run command:** `java -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -cp build/classes/java/main meka.Meka` using Java 25
 - **Comparison rules:** Exact text comparison, normalizing only CRLF/LF line endings unless stated otherwise.
 - **Other setup:** Before each test, remove the `data/meka.txt` file or directory if it exists. If a test specifies a pre-test data file, copy that fixture to `data/meka.txt` before launching the program. If a test specifies an unavailable data path, create a directory at `data/meka.txt`. Capture standard output as UTF-8.
 - **File comparison rules:** When a test specifies expected file content, compare `data/meka.txt` exactly after normalizing only CRLF/LF line endings and allowing the final newline written by `Files.write`.

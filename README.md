@@ -149,3 +149,12 @@ java -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -cp out meka.Meka
 
 Keep `src/main/java` as the Java source root so the project structure remains
 compatible with standard Java build tools.
+
+## Running with Gradle
+
+Use Java 25. On Windows, replace `./gradlew` with `./gradlew.bat`.
+
+```shell
+./gradlew run --console=plain
+./gradlew test
+```
