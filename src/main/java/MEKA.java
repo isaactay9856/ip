@@ -1,34 +1,11 @@
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.format.ResolverStyle;
-import java.util.Locale;
 
 /**
  * Console chatbot for creating, updating, deleting, and persistently storing
  * todo, deadline, and event tasks.
  */
 public class MEKA {
-    /** Strict parser for user-entered date-times such as {@code 2/12/2019 1800}. */
-    private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT =
-            DateTimeFormatter.ofPattern("d/M/uuuu HHmm", Locale.ENGLISH)
-                    .withResolverStyle(ResolverStyle.STRICT);
-    private static final String NUMBER_REQUIRED_MESSAGE =
-            "The following command requires a number to proceed.";
-    private static final String DESCRIPTION_REQUIRED_MESSAGE =
-            "The following command requires a task description to proceed.";
-    private static final String DATE_TIME_REQUIRED_MESSAGE =
-            "The following command requires date/time details to proceed.";
-    private static final String INVALID_DATE_TIME_MESSAGE =
-            "Please enter date and time as d/M/yyyy HHmm "
-                    + "(for example, 2/12/2019 1800).";
-    private static final String RESERVED_DELIMITER_MESSAGE =
-            "Task details cannot contain \" | \" because it is reserved for saved data.";
-    private static final String UNKNOWN_COMMAND_MESSAGE =
-            "I do not understand this command. Please input a valid command.";
-
     /**
      * Prevents construction because MEKA is started through {@link #main(String[])}.
      */
@@ -69,219 +46,56 @@ public class MEKA {
 
             ui.showLine();
             try {
-                if (command.equals("list")) {
+                String commandWord = Parser.getCommandWord(command);
+                if (commandWord.equals("list")) {
                     ui.showTaskList(tasks);
 
-                } else if (isCommand(command, "mark")) {
-                    int taskNumber = parseTaskNumber(command, "mark");
+                } else if (commandWord.equals("mark")) {
+                    int taskNumber = Parser.parseTaskNumber(command, "mark");
                     Task task = tasks.get(taskNumber);
                     task.markAsDone();
                     saveTasks(storage, tasks, storageAvailable);
                     ui.showTaskMarked(task);
 
-                } else if (isCommand(command, "unmark")) {
-                    int taskNumber = parseTaskNumber(command, "unmark");
+                } else if (commandWord.equals("unmark")) {
+                    int taskNumber = Parser.parseTaskNumber(command, "unmark");
                     Task task = tasks.get(taskNumber);
                     task.unmark();
                     saveTasks(storage, tasks, storageAvailable);
                     ui.showTaskUnmarked(task);
 
-                } else if (isCommand(command, "delete")) {
-                    int taskNumber = parseTaskNumber(command, "delete");
+                } else if (commandWord.equals("delete")) {
+                    int taskNumber = Parser.parseTaskNumber(command, "delete");
                     Task task = tasks.delete(taskNumber);
                     saveTasks(storage, tasks, storageAvailable);
                     ui.showTaskDeleted(task, tasks.size());
 
-                } else if (isCommand(command, "todo")) {
-                    String description = parseDescription(command, "todo");
-                    Task task = new Todo(description);
+                } else if (commandWord.equals("todo")) {
+                    Task task = Parser.parseTodo(command);
                     tasks.add(task);
                     saveTasks(storage, tasks, storageAvailable);
                     ui.showTaskAdded(task, tasks.size());
 
-                } else if (isCommand(command, "deadline")) {
-                    int byIndex = findArgumentMarker(command, "by");
-                    String description = byIndex < 0
-                            ? parseDescription(command, "deadline")
-                            : command.substring("deadline".length(), byIndex).trim();
-                    requireDescription(description);
-                    if (byIndex < 0) {
-                        throw new MekaException(UNKNOWN_COMMAND_MESSAGE);
-                    }
-                    String by = command.substring(byIndex + " /by".length()).trim();
-                    requireDateTime(by);
-                    Task task = new Deadline(description, parseDateTime(by));
+                } else if (commandWord.equals("deadline")) {
+                    Task task = Parser.parseDeadline(command);
                     tasks.add(task);
                     saveTasks(storage, tasks, storageAvailable);
                     ui.showTaskAdded(task, tasks.size());
 
-                } else if (isCommand(command, "event")) {
-                    int fromIndex = findArgumentMarker(command, "from");
-                    int toIndex = fromIndex < 0
-                            ? -1
-                            : findArgumentMarker(command, "to", fromIndex + " /from".length());
-                    String description = fromIndex < 0
-                            ? parseDescription(command, "event")
-                            : command.substring("event".length(), fromIndex).trim();
-                    requireDescription(description);
-                    if (fromIndex < 0 || toIndex < 0) {
-                        throw new MekaException(UNKNOWN_COMMAND_MESSAGE);
-                    }
-                    String from = command.substring(fromIndex + " /from".length(), toIndex).trim();
-                    String to = command.substring(toIndex + " /to".length()).trim();
-                    requireDateTime(from);
-                    requireDateTime(to);
-                    Task task = new Event(description,
-                            parseDateTime(from), parseDateTime(to));
+                } else if (commandWord.equals("event")) {
+                    Task task = Parser.parseEvent(command);
                     tasks.add(task);
                     saveTasks(storage, tasks, storageAvailable);
                     ui.showTaskAdded(task, tasks.size());
 
-                } else {
-                    throw new MekaException(UNKNOWN_COMMAND_MESSAGE);
                 }
             } catch (MekaException exception) {
                 ui.showError(exception.getMessage());
-            } catch (NumberFormatException exception) {
-                ui.showError(NUMBER_REQUIRED_MESSAGE);
             } catch (IOException | SecurityException exception) {
                 storageAvailable = false;
                 ui.showSavingError();
             }
             ui.showLine();
-        }
-    }
-
-    /**
-     * Returns whether the input contains the given command word, optionally
-     * followed by arguments.
-     *
-     * @param input complete user input
-     * @param command command word to match
-     * @return true if the input represents the command
-     */
-    private static boolean isCommand(String input, String command) {
-        return input.equals(command) || input.startsWith(command + " ");
-    }
-
-    /**
-     * Finds a slash-prefixed argument marker such as {@code /by} or
-     * {@code /from}.
-     *
-     * @param input complete user input
-     * @param marker marker name without the slash
-     * @return the marker's starting index, or -1 if it is not present
-     */
-    private static int findArgumentMarker(String input, String marker) {
-        return findArgumentMarker(input, marker, 0);
-    }
-
-    /**
-     * Finds a slash-prefixed argument marker at or after a given index.
-     * A marker is accepted only when it ends the input or is followed by
-     * whitespace, preventing text such as {@code /bye} from matching
-     * {@code /by}.
-     *
-     * @param input complete user input
-     * @param marker marker name without the slash
-     * @param startIndex index at which to begin searching
-     * @return the marker's starting index, or -1 if it is not present
-     */
-    private static int findArgumentMarker(String input, String marker, int startIndex) {
-        String markerText = " /" + marker;
-        int markerIndex = input.indexOf(markerText, startIndex);
-
-        while (markerIndex >= 0) {
-            int afterMarker = markerIndex + markerText.length();
-            if (afterMarker == input.length()
-                    || Character.isWhitespace(input.charAt(afterMarker))) {
-                return markerIndex;
-            }
-            markerIndex = input.indexOf(markerText, markerIndex + 1);
-        }
-        return -1;
-    }
-
-    /**
-     * Extracts a task number from a mark, unmark, or delete command.
-     *
-     * @param input complete user input
-     * @param command command word at the start of the input
-     * @return the supplied task number
-     * @throws MekaException if no number was supplied
-     * @throws NumberFormatException if the supplied argument is not a number
-     */
-    private static int parseTaskNumber(String input, String command) throws MekaException {
-        String numberText = input.substring(command.length()).trim();
-        if (numberText.isEmpty()) {
-            throw new MekaException(NUMBER_REQUIRED_MESSAGE);
-        }
-        return Integer.parseInt(numberText);
-    }
-
-    /**
-     * Extracts and validates a task description from a task creation command.
-     *
-     * @param input complete user input
-     * @param command command word at the start of the input
-     * @return the non-empty task description
-     * @throws MekaException if the description is empty
-     */
-    private static String parseDescription(String input, String command) throws MekaException {
-        String description = input.substring(command.length()).trim();
-        requireDescription(description);
-        return description;
-    }
-
-    /**
-     * Ensures a task description contains visible characters.
-     *
-     * @param description task description to validate
-     * @throws MekaException if the description is empty
-     */
-    private static void requireDescription(String description) throws MekaException {
-        requireStorableText(description, DESCRIPTION_REQUIRED_MESSAGE);
-    }
-
-    /**
-     * Ensures a date-time argument is present and can be saved safely.
-     *
-     * @param dateTime date and time text to validate
-     * @throws MekaException if the value is empty or contains the file delimiter
-     */
-    private static void requireDateTime(String dateTime) throws MekaException {
-        requireStorableText(dateTime, DATE_TIME_REQUIRED_MESSAGE);
-    }
-
-    /**
-     * Parses a user-entered date and time in the {@code d/M/yyyy HHmm} format.
-     *
-     * @param dateTime date and time text supplied by the user
-     * @return the parsed date and time
-     * @throws MekaException if the text is not a valid date and time
-     */
-    private static LocalDateTime parseDateTime(String dateTime) throws MekaException {
-        try {
-            return LocalDateTime.parse(dateTime, INPUT_DATE_TIME_FORMAT);
-        } catch (DateTimeParseException exception) {
-            throw new MekaException(INVALID_DATE_TIME_MESSAGE);
-        }
-    }
-
-    /**
-     * Validates user-entered text before placing it in the pipe-separated file.
-     *
-     * @param text text to validate
-     * @param emptyMessage message to use when the text is empty
-     * @throws MekaException if the text is empty or contains the file delimiter
-     */
-    private static void requireStorableText(String text, String emptyMessage)
-            throws MekaException {
-        if (text.isBlank()) {
-            throw new MekaException(emptyMessage);
-        }
-        if (text.contains(" | ")) {
-            throw new MekaException(RESERVED_DELIMITER_MESSAGE);
         }
     }
 
