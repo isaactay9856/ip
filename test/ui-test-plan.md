@@ -7,7 +7,8 @@ This file records console UI test cases for the project. Run test cases in the l
 - **Compile command:** `javac -encoding UTF-8 -d out src/main/java/*.java` using Java 25
 - **Run command:** `java -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -cp out MEKA` using Java 25
 - **Comparison rules:** Exact text comparison, normalizing only CRLF/LF line endings unless stated otherwise.
-- **Other setup:** Start with an empty in-memory task list. Capture standard output as UTF-8. No files are required.
+- **Other setup:** Before each test, remove the `data/meka.txt` file or directory if it exists. If a test specifies a pre-test data file, copy that fixture to `data/meka.txt` before launching the program. If a test specifies an unavailable data path, create a directory at `data/meka.txt`. Capture standard output as UTF-8.
+- **File comparison rules:** When a test specifies expected file content, compare `data/meka.txt` exactly after normalizing only CRLF/LF line endings and allowing the final newline written by `Files.write`.
 
 ## Test cases
 
@@ -61,6 +62,14 @@ ____________________________________________________________
 ____________________________________________________________
  Bye. Hope to see you again soon!
 ____________________________________________________________
+```
+
+- **Expected `data/meka.txt`:**
+
+```text
+T | 0 | borrow book
+D | 0 | return book | Sunday
+E | 0 | project meeting | Mon 2pm | 4pm
 ```
 
 ### UI-02: Reject invalid commands without changing task state
@@ -152,6 +161,14 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+- **Expected `data/meka.txt`:**
+
+```text
+T | 1 | first task
+T | 0 | second task
+E | 0 | team sync | 2pm | 3pm
+```
+
 ### UI-03: Mark and unmark a valid task
 
 - **Aim:** Verify that valid numeric task references change completion state correctly and that the final task list reflects the latest state.
@@ -198,6 +215,12 @@ ____________________________________________________________
 ____________________________________________________________
  Bye. Hope to see you again soon!
 ____________________________________________________________
+```
+
+- **Expected `data/meka.txt`:**
+
+```text
+T | 0 | reversible task
 ```
 
 ### UI-04: Delete a task from the list
@@ -260,3 +283,204 @@ ____________________________________________________________
  Bye. Hope to see you again soon!
 ____________________________________________________________
 ```
+
+- **Expected `data/meka.txt`:**
+
+```text
+T | 0 | borrow book
+E | 0 | project meeting | Mon 2pm | 4pm
+```
+
+### UI-05: Load saved tasks on startup
+
+- **Aim:** Verify that Todo, Deadline, and Event tasks, including their completion states, are restored from the data file when the program starts.
+- **Pre-test data file:** Copy `test/data/load-all-task-types.txt` to `data/meka.txt`.
+- **Inputs (in order):**
+
+```text
+list
+bye
+```
+
+- **Expected output:**
+
+```text
+____________________________________________________________
+███╗   ███╗███████╗██╗  ██╗ █████╗
+████╗ ████║██╔════╝██║ ██╔╝██╔══██╗
+██╔████╔██║█████╗  █████╔╝ ███████║
+██║╚██╔╝██║██╔══╝  ██╔═██╗ ██╔══██║
+██║ ╚═╝ ██║███████╗██║  ██╗██║  ██║
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
+
+ Hello! I'm MEKA.
+ What can I do for you?
+____________________________________________________________
+____________________________________________________________
+ 1. [T][X] read book
+ 2. [D][ ] return book (by: June 6th)
+ 3. [E][X] project meeting (from: Aug 6th 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Bye. Hope to see you again soon!
+____________________________________________________________
+```
+
+- **Expected `data/meka.txt`:**
+
+```text
+T | 1 | read book
+D | 0 | return book | June 6th
+E | 1 | project meeting | Aug 6th 2pm | 4pm
+```
+
+### UI-06: Reject task details that cannot be saved
+
+- **Aim:** Verify that missing date/time details and the reserved file delimiter are rejected without changing the task list or data file.
+- **Inputs (in order):**
+
+```text
+deadline submit report /by
+event team meeting /from /to 4pm
+event team meeting /from 2pm /to
+todo left | right
+deadline clean room /by next | week
+todo valid task
+list
+bye
+```
+
+- **Expected output:**
+
+```text
+____________________________________________________________
+███╗   ███╗███████╗██╗  ██╗ █████╗
+████╗ ████║██╔════╝██║ ██╔╝██╔══██╗
+██╔████╔██║█████╗  █████╔╝ ███████║
+██║╚██╔╝██║██╔══╝  ██╔═██╗ ██╔══██║
+██║ ╚═╝ ██║███████╗██║  ██╗██║  ██║
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
+
+ Hello! I'm MEKA.
+ What can I do for you?
+____________________________________________________________
+____________________________________________________________
+ The following command requires date/time details to proceed.
+____________________________________________________________
+____________________________________________________________
+ The following command requires date/time details to proceed.
+____________________________________________________________
+____________________________________________________________
+ The following command requires date/time details to proceed.
+____________________________________________________________
+____________________________________________________________
+ Task details cannot contain " | " because it is reserved for saved data.
+____________________________________________________________
+____________________________________________________________
+ Task details cannot contain " | " because it is reserved for saved data.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] valid task
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ 1. [T][ ] valid task
+____________________________________________________________
+____________________________________________________________
+ Bye. Hope to see you again soon!
+____________________________________________________________
+```
+
+- **Expected `data/meka.txt`:**
+
+```text
+T | 0 | valid task
+```
+
+### UI-07: Recover from corrupted saved data
+
+- **Aim:** Verify that invalid saved data produces a friendly warning, starts with an empty list, preserves the original file, and keeps later changes in memory only.
+- **Pre-test data file:** Copy `test/data/invalid-status.txt` to `data/meka.txt`.
+- **Inputs (in order):**
+
+```text
+list
+todo recovered task
+list
+bye
+```
+
+- **Expected output:**
+
+```text
+____________________________________________________________
+███╗   ███╗███████╗██╗  ██╗ █████╗
+████╗ ████║██╔════╝██║ ██╔╝██╔══██╗
+██╔████╔██║█████╗  █████╔╝ ███████║
+██║╚██╔╝██║██╔══╝  ██╔═██╗ ██╔══██║
+██║ ╚═╝ ██║███████╗██║  ██╗██║  ██║
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
+
+ Hello! I'm MEKA.
+ What can I do for you?
+ I could not load the saved tasks, so I started with an empty task list.
+____________________________________________________________
+____________________________________________________________
+____________________________________________________________
+____________________________________________________________
+ I could not save the task list. Your changes are available only for this session.
+____________________________________________________________
+____________________________________________________________
+ 1. [T][ ] recovered task
+____________________________________________________________
+____________________________________________________________
+ Bye. Hope to see you again soon!
+____________________________________________________________
+```
+
+- **Expected `data/meka.txt`:**
+
+```text
+T | 2 | invalid status
+```
+
+### UI-08: Continue when the data path is unavailable
+
+- **Aim:** Verify that read and write failures produce friendly warnings while the chatbot continues to maintain its in-memory task list.
+- **Pre-test unavailable data path:** Create a directory at `data/meka.txt`.
+- **Inputs (in order):**
+
+```text
+todo session-only task
+list
+bye
+```
+
+- **Expected output:**
+
+```text
+____________________________________________________________
+███╗   ███╗███████╗██╗  ██╗ █████╗
+████╗ ████║██╔════╝██║ ██╔╝██╔══██╗
+██╔████╔██║█████╗  █████╔╝ ███████║
+██║╚██╔╝██║██╔══╝  ██╔═██╗ ██╔══██║
+██║ ╚═╝ ██║███████╗██║  ██╗██║  ██║
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
+
+ Hello! I'm MEKA.
+ What can I do for you?
+ I could not load the saved tasks, so I started with an empty task list.
+____________________________________________________________
+____________________________________________________________
+ I could not save the task list. Your changes are available only for this session.
+____________________________________________________________
+____________________________________________________________
+ 1. [T][ ] session-only task
+____________________________________________________________
+____________________________________________________________
+ Bye. Hope to see you again soon!
+____________________________________________________________
+```
+
+- **Expected data path:** `data/meka.txt` remains a directory.
