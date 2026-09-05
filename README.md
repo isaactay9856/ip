@@ -1,8 +1,15 @@
 # MEKA
 
-MEKA is a command-line task chatbot written in Java. It keeps track of todos,
+MEKA is a JavaFX task chatbot written in Java. It keeps track of todos,
 deadlines, and events, remembers whether tasks are complete, and restores saved
-tasks the next time it starts.
+tasks the next time it starts. The original console interface remains available
+for automated testing.
+
+### Level 10: Graphical user interface
+
+MEKA provides a chat-style JavaFX interface. Type a command into the input box
+and press Enter or select **Send**. Messages scroll automatically, and entering
+`bye` displays MEKA's farewell before closing the window.
 
 ## Features by level
 
@@ -140,41 +147,28 @@ For deadline and event commands, replace `DATE_TIME` with a value such as
 ## Requirements
 
 - Java Development Kit (JDK) 25
-- IntelliJ IDEA, or a terminal with `javac` and `java`
+- IntelliJ IDEA, or a terminal that can run Gradle
 
 ## Running in IntelliJ IDEA
 
 1. Open this repository as an IntelliJ IDEA project.
 2. Configure the Project SDK as JDK 25 and leave the language level as
    `SDK default`.
-3. Open `src/main/java/meka/Meka.java`.
-4. Run `Meka.main()`.
+3. Open `src/main/java/meka/gui/Launcher.java`.
+4. Run `Launcher.main()`.
 
 ## Running from a terminal
 
-From the repository root, compile the source files:
-
-```shell
-javac -encoding UTF-8 -d out (Get-ChildItem src/main/java -Recurse -Filter *.java).FullName
-```
-
-Then run MEKA:
-
-```shell
-java -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -cp out meka.Meka
-```
-
-Keep `src/main/java` as the Java source root so the project structure remains
-compatible with standard Java build tools.
-
-## Running with Gradle
-
-Use Java 25. On Windows, replace `./gradlew` with `./gradlew.bat`.
+Use Java 25, then run the Gradle wrapper from the repository root. On Windows,
+replace `./gradlew` with `./gradlew.bat`.
 
 ```shell
 ./gradlew run --console=plain
 ./gradlew test
 ```
+
+The Gradle `run` task starts the JavaFX interface. To run the console interface,
+run `meka.Meka` directly from IntelliJ IDEA.
 
 ## Building the executable JAR
 
