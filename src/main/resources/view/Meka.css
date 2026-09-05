@@ -1,0 +1,80 @@
+.root {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+}
+
+.dialog-container,
+.dialog-scroll-pane,
+.dialog-scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.main-window {
+    -fx-background-image: url("../images/meka-squad.png");
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+}
+
+.dialog-scroll-pane {
+    -fx-border-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.input-bar {
+    -fx-alignment: center;
+    -fx-background-color: rgba(255, 255, 255, 0.92);
+    -fx-border-color: #dce2eb transparent transparent transparent;
+}
+
+.text-field {
+    -fx-background-color: #eef2f7;
+    -fx-background-radius: 18px;
+    -fx-padding: 9px 14px;
+}
+
+.button {
+    -fx-background-color: #536dfe;
+    -fx-background-radius: 18px;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 9px 18px;
+}
+
+.button:hover {
+    -fx-background-color: #3d56e8;
+}
+
+.message-bubble {
+    -fx-background-radius: 14px;
+    -fx-padding: 10px 12px;
+}
+
+.avatar {
+    -fx-background-radius: 21px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.user-dialog .message-bubble {
+    -fx-background-color: #536dfe;
+    -fx-text-fill: white;
+}
+
+.user-dialog .avatar {
+    -fx-background-color: #dfe5ff;
+    -fx-text-fill: #3447ba;
+}
+
+.meka-dialog .message-bubble {
+    -fx-background-color: white;
+    -fx-border-color: #dce2eb;
+    -fx-border-radius: 14px;
+    -fx-text-fill: #263238;
+}
+
+.meka-dialog .avatar {
+    -fx-background-color: #263238;
+    -fx-text-fill: white;
+}

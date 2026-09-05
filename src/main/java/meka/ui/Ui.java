@@ -1,5 +1,6 @@
 package meka.ui;
 
+import java.io.PrintStream;
 import java.util.Scanner;
 
 import meka.task.Task;
@@ -31,11 +32,24 @@ public class Ui {
     /** Source of commands entered by the user. */
     private final Scanner scanner;
 
+    /** Destination for messages shown to the user. */
+    private final PrintStream output;
+
     /**
      * Creates a console user interface that reads from standard input.
      */
     public Ui() {
-        this.scanner = new Scanner(System.in);
+        this(System.out);
+    }
+
+    /**
+     * Creates a user interface that writes to the specified output stream.
+     *
+     * @param output destination for user-visible messages.
+     */
+    public Ui(PrintStream output) {
+        scanner = new Scanner(System.in);
+        this.output = output;
     }
 
     /**
@@ -61,23 +75,23 @@ public class Ui {
      */
     public void showWelcome() {
         showLine();
-        System.out.println(BANNER);
-        System.out.println(" Hello! I'm MEKA.");
-        System.out.println(" What can I do for you?");
+        output.println(BANNER);
+        output.println(" Hello! I'm MEKA.");
+        output.println(" What can I do for you?");
     }
 
     /**
      * Shows the message displayed when MEKA exits.
      */
     public void showGoodbye() {
-        System.out.println(" Bye. Hope to see you again soon!");
+        output.println(" Bye. Hope to see you again soon!");
     }
 
     /**
      * Shows a horizontal divider between interactions.
      */
     public void showLine() {
-        System.out.println(SEPARATOR);
+        output.println(SEPARATOR);
     }
 
     /**
@@ -88,7 +102,7 @@ public class Ui {
     public void showTaskList(TaskList tasks) {
         int taskNumber = 1;
         for (Task task : tasks) {
-            System.out.println(" " + taskNumber + ". " + task);
+            output.println(" " + taskNumber + ". " + task);
             taskNumber++;
         }
     }
@@ -99,7 +113,7 @@ public class Ui {
      * @param matches Matching tasks in their original order.
      */
     public void showMatchingTasks(TaskList matches) {
-        System.out.println(" Here are the matching tasks in your list:");
+        output.println(" Here are the matching tasks in your list:");
         showTaskList(matches);
     }
 
@@ -110,9 +124,9 @@ public class Ui {
      * @param taskCount current number of tasks.
      */
     public void showTaskAdded(Task task, int taskCount) {
-        System.out.println(" Got it. I've added this task:");
-        System.out.println("   " + task);
-        System.out.println(" Now you have " + taskCount + " tasks in the list.");
+        output.println(" Got it. I've added this task:");
+        output.println("   " + task);
+        output.println(" Now you have " + taskCount + " tasks in the list.");
     }
 
     /**
@@ -121,8 +135,8 @@ public class Ui {
      * @param task task that was marked.
      */
     public void showTaskMarked(Task task) {
-        System.out.println(" Nice! I've marked this task as done:");
-        System.out.println("   " + task);
+        output.println(" Nice! I've marked this task as done:");
+        output.println("   " + task);
     }
 
     /**
@@ -131,8 +145,8 @@ public class Ui {
      * @param task task that was unmarked.
      */
     public void showTaskUnmarked(Task task) {
-        System.out.println(" OK, I've marked this task as not done yet:");
-        System.out.println("   " + task);
+        output.println(" OK, I've marked this task as not done yet:");
+        output.println("   " + task);
     }
 
     /**
@@ -142,9 +156,9 @@ public class Ui {
      * @param taskCount number of tasks remaining.
      */
     public void showTaskDeleted(Task task, int taskCount) {
-        System.out.println(" Noted. I've removed this task:");
-        System.out.println("   " + task);
-        System.out.println(" Now you have " + taskCount + " tasks in the list.");
+        output.println(" Noted. I've removed this task:");
+        output.println("   " + task);
+        output.println(" Now you have " + taskCount + " tasks in the list.");
     }
 
     /**
@@ -153,7 +167,7 @@ public class Ui {
      * @param message explanation to show the user.
      */
     public void showError(String message) {
-        System.out.println(" " + message);
+        output.println(" " + message);
     }
 
     /**

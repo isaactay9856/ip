@@ -1,6 +1,9 @@
 package meka;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 import meka.command.Command;
@@ -15,6 +18,8 @@ import meka.ui.Ui;
  * Coordinates MEKA's user interface, task list, command parser, and storage.
  */
 public class Meka {
+    private static final String DEFAULT_FILE_PATH = "data/meka.txt";
+
     /** Storage component used to load and save tasks. */
     private final Storage storage;
 
@@ -26,6 +31,16 @@ public class Meka {
 
     /** Whether startup encountered an error while loading saved tasks. */
     private final boolean hasLoadingError;
+
+    /** Whether the most recent command requested that the application exit. */
+    private boolean isExitRequested;
+
+    /**
+     * Creates MEKA using its default task data file.
+     */
+    public Meka() {
+        this(DEFAULT_FILE_PATH);
+    }
 
     /**
      * Creates MEKA and loads tasks from the specified data file.
@@ -66,18 +81,52 @@ public class Meka {
         while (!isExit && ui.hasNextCommand()) {
             String fullCommand = ui.readCommand();
             ui.showLine();
-            try {
-                Command command = Parser.parse(fullCommand);
-                command.execute(tasks, ui, storage);
-                isExit = command.isExit();
-            } catch (MekaException exception) {
-                ui.showError(exception.getMessage());
-            } catch (IOException | SecurityException exception) {
-                storage.markUnavailable();
-                ui.showSavingError();
-            } finally {
-                ui.showLine();
-            }
+            processCommand(fullCommand, ui);
+            isExit = isExitRequested;
+            ui.showLine();
+        }
+    }
+
+    /**
+     * Returns MEKA's response to a command entered through the graphical interface.
+     *
+     * @param input command entered by the user.
+     * @return user-visible response produced by the command.
+     */
+    public String getResponse(String input) {
+        ByteArrayOutputStream responseBytes = new ByteArrayOutputStream();
+        try (PrintStream responseOutput = new PrintStream(responseBytes, true, StandardCharsets.UTF_8)) {
+            processCommand(input.trim(), new Ui(responseOutput));
+        }
+        return responseBytes.toString(StandardCharsets.UTF_8).strip();
+    }
+
+    /**
+     * Returns whether the most recent command requested that MEKA exit.
+     *
+     * @return true after a successful {@code bye} command.
+     */
+    public boolean isExitRequested() {
+        return isExitRequested;
+    }
+
+    /**
+     * Parses and executes one command, reporting recoverable failures through the supplied UI.
+     *
+     * @param fullCommand complete command text.
+     * @param targetUi interface that receives the command result.
+     */
+    private void processCommand(String fullCommand, Ui targetUi) {
+        isExitRequested = false;
+        try {
+            Command command = Parser.parse(fullCommand);
+            command.execute(tasks, targetUi, storage);
+            isExitRequested = command.isExit();
+        } catch (MekaException exception) {
+            targetUi.showError(exception.getMessage());
+        } catch (IOException | SecurityException exception) {
+            storage.markUnavailable();
+            targetUi.showSavingError();
         }
     }
 
@@ -87,6 +136,6 @@ public class Meka {
      * @param args command-line arguments; not used.
      */
     public static void main(String[] args) {
-        new Meka("data/meka.txt").run();
+        new Meka().run();
     }
 }
