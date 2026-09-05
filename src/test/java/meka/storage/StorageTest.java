@@ -82,7 +82,7 @@ public class StorageTest {
     }
 
     @Test
-    public void load_directoryInsteadOfFile_throwsIOException() throws Exception {
+    public void load_directoryInsteadOfFile_throwsIoException() throws Exception {
         assertThrows(IOException.class, () -> new Storage(directory).load());
     }
 }
