@@ -30,6 +30,8 @@ public class Storage {
      * @param filePath location of the task data file.
      */
     public Storage(Path filePath) {
+        assert filePath != null : "Storage should be configured with a data file path";
+
         this.filePath = filePath;
         this.isAvailable = true;
     }
