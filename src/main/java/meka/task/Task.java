@@ -18,6 +18,10 @@ public class Task {
      * @param description description of the task.
      */
     public Task(String description) {
+        assert description != null : "A task should have a description";
+        assert !description.isBlank() : "A task description should contain visible characters";
+        assert !description.contains(" | ") : "A task description should be safe to persist";
+
         this.description = description;
         this.isDone = false;
     }

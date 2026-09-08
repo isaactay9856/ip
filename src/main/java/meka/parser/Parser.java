@@ -74,6 +74,8 @@ public class Parser {
      * @throws MekaException if the command or its arguments are invalid.
      */
     public static Command parse(String input) throws MekaException {
+        assert input != null : "Command input should come from a user interface";
+
         if (input.equals("bye")) {
             return new ExitCommand();
         }

@@ -31,6 +31,8 @@ public class TaskList implements Iterable<Task> {
      * @param tasks tasks with which to initialize the list.
      */
     public TaskList(ArrayList<Task> tasks) {
+        assert tasks != null : "A task list should be created from a collection";
+
         this.tasks = new ArrayList<>(tasks);
     }
 
@@ -40,6 +42,8 @@ public class TaskList implements Iterable<Task> {
      * @param task task to add.
      */
     public void add(Task task) {
+        assert task != null : "A task list should contain only task objects";
+
         tasks.add(task);
     }
 
