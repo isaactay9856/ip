@@ -2,6 +2,7 @@ package meka.task;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.stream.Collectors;
 
 import meka.exception.MekaException;
 
@@ -90,13 +91,10 @@ public class TaskList implements Iterable<Task> {
      * @return A separate list containing the matching tasks.
      */
     public TaskList find(String keyword) {
-        TaskList matches = new TaskList();
-        for (Task task : tasks) {
-            if (task.containsKeyword(keyword)) {
-                matches.add(task);
-            }
-        }
-        return matches;
+        ArrayList<Task> matches = tasks.stream()
+                .filter(task -> task.containsKeyword(keyword))
+                .collect(Collectors.toCollection(ArrayList::new));
+        return new TaskList(matches);
     }
 
     /**
