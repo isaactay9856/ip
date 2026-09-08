@@ -7,6 +7,7 @@ import java.time.format.ResolverStyle;
 import java.util.Locale;
 
 import meka.command.AddCommand;
+import meka.command.ArchiveCommand;
 import meka.command.Command;
 import meka.command.DeleteCommand;
 import meka.command.ExitCommand;
@@ -81,6 +82,9 @@ public class Parser {
         }
         if (input.equals("list")) {
             return new ListCommand();
+        }
+        if (input.equals("archive all")) {
+            return new ArchiveCommand();
         }
         if (isCommand(input, "find")) {
             return new FindCommand(parseDescription(input, "find"));

@@ -20,6 +20,33 @@ Example: `keyword (optional arguments)`
 expected output
 ```
 
+## Archiving all tasks
+
+Use `archive all` to move every active task into `data/meka-archive.txt`
+and start again with an empty task list.
+
+Example:
+
+```text
+archive all
+```
+
+MEKA confirms how many tasks were archived:
+
+```text
+Noted. I've archived all 3 tasks.
+Now you have 0 tasks in the list.
+```
+
+If the active task list is empty, MEKA responds:
+
+```text
+There are no tasks to archive.
+```
+
+Archived tasks remain in `data/meka-archive.txt` as a permanent record.
+MEKA does not support viewing, restoring, or deleting archive entries.
+
 ## Feature ABC
 
 // Feature details

@@ -21,6 +21,9 @@ public class Storage {
     /** Location of the task data file. */
     private final Path filePath;
 
+    /** Location of the file that retains archived task records. */
+    private final Path archiveFilePath;
+
     /** Whether the data file remains safe and available for saving. */
     private boolean isAvailable;
 
@@ -33,6 +36,7 @@ public class Storage {
         assert filePath != null : "Storage should be configured with a data file path";
 
         this.filePath = filePath;
+        this.archiveFilePath = deriveArchiveFilePath(filePath);
         this.isAvailable = true;
     }
 
@@ -83,10 +87,83 @@ public class Storage {
     }
 
     /**
+     * Appends all active tasks to the archive and clears the saved active-task file.
+     *
+     * The supplied in-memory task list is not modified. If clearing the active-task
+     * file fails, this method attempts to restore the archive to its previous state.
+     *
+     * @param tasks active tasks to archive.
+     * @throws IOException if the archive or active-task file cannot be updated.
+     */
+    public void archiveAll(TaskList tasks) throws IOException {
+        if (!isAvailable) {
+            throw new IOException("Task storage is unavailable");
+        }
+
+        boolean didArchiveExist = Files.exists(archiveFilePath);
+        byte[] originalArchiveData = didArchiveExist
+                ? Files.readAllBytes(archiveFilePath)
+                : new byte[0];
+        ArrayList<String> archivedTaskData = didArchiveExist
+                ? new ArrayList<>(Files.readAllLines(archiveFilePath))
+                : new ArrayList<>();
+        for (Task task : tasks) {
+            archivedTaskData.add(task.toDataString());
+        }
+
+        Files.createDirectories(archiveFilePath.getParent());
+        Files.write(archiveFilePath, archivedTaskData);
+        try {
+            save(new TaskList());
+        } catch (IOException exception) {
+            rollbackArchive(didArchiveExist, originalArchiveData, exception);
+            throw exception;
+        } catch (SecurityException exception) {
+            rollbackArchive(didArchiveExist, originalArchiveData, exception);
+            throw exception;
+        }
+    }
+
+    /**
      * Prevents later save attempts after loading or saving has failed.
      */
     public void markUnavailable() {
         isAvailable = false;
+    }
+
+    /**
+     * Derives an archive path by inserting {@code -archive} before the data-file extension.
+     *
+     * @param activeFilePath active task data path.
+     * @return neighboring archive data path.
+     */
+    private Path deriveArchiveFilePath(Path activeFilePath) {
+        String fileName = activeFilePath.getFileName().toString();
+        int extensionIndex = fileName.lastIndexOf('.');
+        String archiveFileName = extensionIndex > 0
+                ? fileName.substring(0, extensionIndex) + "-archive" + fileName.substring(extensionIndex)
+                : fileName + "-archive";
+        return activeFilePath.resolveSibling(archiveFileName);
+    }
+
+    /**
+     * Attempts to restore the archive after the active-task file could not be cleared.
+     *
+     * @param didArchiveExist whether the archive existed before the attempted operation.
+     * @param originalArchiveData exact original archive contents.
+     * @param originalException failure that caused the rollback.
+     */
+    private void rollbackArchive(boolean didArchiveExist, byte[] originalArchiveData,
+            Exception originalException) {
+        try {
+            if (didArchiveExist) {
+                Files.write(archiveFilePath, originalArchiveData);
+            } else {
+                Files.deleteIfExists(archiveFilePath);
+            }
+        } catch (IOException | SecurityException rollbackException) {
+            originalException.addSuppressed(rollbackException);
+        }
     }
 
     /**

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import meka.command.AddCommand;
+import meka.command.ArchiveCommand;
 import meka.command.Command;
 import meka.command.DeleteCommand;
 import meka.command.ExitCommand;
@@ -33,6 +34,7 @@ public class ParserTest {
         assertInstanceOf(MarkCommand.class, Parser.parse("mark 1"));
         assertInstanceOf(UnmarkCommand.class, Parser.parse("unmark 1"));
         assertInstanceOf(DeleteCommand.class, Parser.parse("delete 1"));
+        assertInstanceOf(ArchiveCommand.class, Parser.parse("archive all"));
         assertInstanceOf(ListCommand.class, Parser.parse("list"));
         Command exit = Parser.parse("bye");
         assertInstanceOf(ExitCommand.class, exit);
@@ -86,7 +88,8 @@ public class ParserTest {
             "todo", "todo text | reserved", "deadline /by 2/12/2019 1800",
             "deadline task /by", "deadline task /by 31/2/2019 1800",
             "deadline task /bye 2/12/2019 1800", "event meeting /from 3/12/2019 0900",
-            "event meeting /to 4/12/2019 1730 /from 3/12/2019 0900", "dance", "list extra"
+            "event meeting /to 4/12/2019 1730 /from 3/12/2019 0900",
+            "archive", "archive 1", "dance", "list extra"
         };
         for (String input : inputs) {
             assertThrows(MekaException.class, () -> Parser.parse(input), input);

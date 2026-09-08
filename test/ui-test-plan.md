@@ -539,3 +539,64 @@ T | 1 | read book
 D | 0 | return book | 2019-06-06T18:00
 E | 1 | project meeting | 2019-08-06T14:00 | 2019-08-06T16:00
 ```
+
+### UI-10: Archive all active tasks
+
+- **Aim:** Verify that `archive all` preserves every task in order, clears the active list, and reports an empty list on a second archive attempt.
+- **Inputs (in order):**
+
+```text
+todo first task
+deadline second task /by 14/9/2026 1800
+archive all
+list
+archive all
+bye
+```
+
+- **Expected output:**
+
+```text
+____________________________________________________________
+███╗   ███╗███████╗██╗  ██╗ █████╗
+████╗ ████║██╔════╝██║ ██╔╝██╔══██╗
+██╔████╔██║█████╗  █████╔╝ ███████║
+██║╚██╔╝██║██╔══╝  ██╔═██╗ ██╔══██║
+██║ ╚═╝ ██║███████╗██║  ██╗██║  ██║
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
+
+ Hello! I'm MEKA.
+ What can I do for you?
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] first task
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [D][ ] second task (by: Sep 14 2026, 6:00 PM)
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Noted. I've archived all 2 tasks.
+ Now you have 0 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+____________________________________________________________
+____________________________________________________________
+ There are no tasks to archive.
+____________________________________________________________
+____________________________________________________________
+ Bye. Hope to see you again soon!
+____________________________________________________________
+```
+
+- **Expected `data/meka.txt`:** Empty file.
+
+- **Expected `data/meka-archive.txt`:**
+
+```text
+T | 0 | first task
+D | 0 | second task | 2026-09-14T18:00
+```
