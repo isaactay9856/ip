@@ -99,12 +99,48 @@ public class Storage {
      */
     private Task parseTask(String line, int lineNumber) throws DataFileException {
         String[] fields = line.split(" \\| ", -1);
-        if (fields.length < 1) {
-            throw invalidData(lineNumber, "missing task type");
-        }
+        validateFields(fields, lineNumber);
 
+        Task task = createTask(fields, lineNumber);
+        if (fields[1].equals("1")) {
+            task.markAsDone();
+        }
+        return task;
+    }
+
+    /**
+     * Validates the structure and common fields of one saved task record.
+     *
+     * @param fields fields obtained from the saved record.
+     * @param lineNumber one-based line number of the record.
+     * @throws DataFileException if the record has an invalid structure or common field.
+     */
+    private void validateFields(String[] fields, int lineNumber) throws DataFileException {
+        int expectedFieldCount = getExpectedFieldCount(fields[0], lineNumber);
+        if (fields.length != expectedFieldCount) {
+            throw invalidData(lineNumber, "incorrect number of fields");
+        }
+        if (!fields[1].equals("0") && !fields[1].equals("1")) {
+            throw invalidData(lineNumber, "invalid completion status");
+        }
+        for (int i = 2; i < fields.length; i++) {
+            if (fields[i].isBlank()) {
+                throw invalidData(lineNumber, "empty task detail");
+            }
+        }
+    }
+
+    /**
+     * Returns the number of fields required by a saved task type.
+     *
+     * @param taskType letter identifying the saved task type.
+     * @param lineNumber one-based line number of the record.
+     * @return required number of fields.
+     * @throws DataFileException if the task type is unknown.
+     */
+    private int getExpectedFieldCount(String taskType, int lineNumber) throws DataFileException {
         int expectedFieldCount;
-        switch (fields[0]) {
+        switch (taskType) {
             case "T":
                 expectedFieldCount = 3;
                 break;
@@ -117,19 +153,18 @@ public class Storage {
             default:
                 throw invalidData(lineNumber, "unknown task type");
         }
+        return expectedFieldCount;
+    }
 
-        if (fields.length != expectedFieldCount) {
-            throw invalidData(lineNumber, "incorrect number of fields");
-        }
-        if (!fields[1].equals("0") && !fields[1].equals("1")) {
-            throw invalidData(lineNumber, "invalid completion status");
-        }
-        for (int i = 2; i < fields.length; i++) {
-            if (fields[i].isBlank()) {
-                throw invalidData(lineNumber, "empty task detail");
-            }
-        }
-
+    /**
+     * Creates a task from fields whose structure has already been validated.
+     *
+     * @param fields validated fields from the saved record.
+     * @param lineNumber one-based line number of the record.
+     * @return reconstructed task.
+     * @throws DataFileException if a date-time field is invalid.
+     */
+    private Task createTask(String[] fields, int lineNumber) throws DataFileException {
         Task task;
         try {
             switch (fields[0]) {
@@ -148,10 +183,6 @@ public class Storage {
             }
         } catch (DateTimeParseException exception) {
             throw invalidData(lineNumber, "invalid date and time");
-        }
-
-        if (fields[1].equals("1")) {
-            task.markAsDone();
         }
         return task;
     }
