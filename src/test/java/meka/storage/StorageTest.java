@@ -2,6 +2,7 @@ package meka.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -84,5 +85,15 @@ public class StorageTest {
     @Test
     public void load_directoryInsteadOfFile_throwsIoException() throws Exception {
         assertThrows(IOException.class, () -> new Storage(directory).load());
+    }
+
+    @Test
+    public void save_emptyTaskList_createsParentDirectoryAndEmptyFile() throws Exception {
+        Path file = directory.resolve("nested/data/meka.txt");
+
+        new Storage(file).save(new TaskList());
+
+        assertTrue(Files.exists(file));
+        assertEquals("", Files.readString(file));
     }
 }
