@@ -22,6 +22,7 @@ class MekaTest {
 
         assertTrue(addResponse.contains("[T][ ] read book"));
         assertEquals("1. [T][ ] read book", listResponse);
+        assertFalse(meka.isLastResponseError());
     }
 
     @Test
@@ -32,6 +33,7 @@ class MekaTest {
 
         assertEquals("I do not understand this command. Please input a valid command.", response);
         assertFalse(meka.isExitRequested());
+        assertTrue(meka.isLastResponseError());
     }
 
     @Test

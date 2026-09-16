@@ -35,6 +35,9 @@ public class Meka {
     /** Whether the most recent command requested that the application exit. */
     private boolean isExitRequested;
 
+    /** Whether the most recent command produced an error response. */
+    private boolean isLastResponseError;
+
     /**
      * Creates MEKA using its default task data file.
      */
@@ -111,6 +114,15 @@ public class Meka {
     }
 
     /**
+     * Returns whether the most recent command produced an error response.
+     *
+     * @return true when the command was invalid or its changes could not be saved.
+     */
+    public boolean isLastResponseError() {
+        return isLastResponseError;
+    }
+
+    /**
      * Parses and executes one command, reporting recoverable failures through the supplied UI.
      *
      * @param fullCommand complete command text.
@@ -118,13 +130,16 @@ public class Meka {
      */
     private void processCommand(String fullCommand, Ui targetUi) {
         isExitRequested = false;
+        isLastResponseError = false;
         try {
             Command command = Parser.parse(fullCommand);
             command.execute(tasks, targetUi, storage);
             isExitRequested = command.isExit();
         } catch (MekaException exception) {
+            isLastResponseError = true;
             targetUi.showError(exception.getMessage());
         } catch (IOException | SecurityException exception) {
+            isLastResponseError = true;
             storage.markUnavailable();
             targetUi.showSavingError();
         }

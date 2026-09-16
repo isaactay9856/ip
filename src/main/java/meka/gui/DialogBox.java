@@ -18,9 +18,6 @@ import javafx.scene.layout.HBox;
  * Displays a speaker avatar beside one chat message.
  */
 public class DialogBox extends HBox {
-    private static final Image USER_IMAGE = new Image(
-            DialogBox.class.getResourceAsStream("/images/dva.jpg"));
-
     private static final Image MEKA_IMAGE = new Image(
             DialogBox.class.getResourceAsStream("/images/dmon.jpg"));
 
@@ -50,7 +47,8 @@ public class DialogBox extends HBox {
      */
     public static DialogBox getUserDialog(String text) {
         DialogBox dialogBox = new DialogBox(text);
-        dialogBox.avatar.setImage(USER_IMAGE);
+        dialogBox.avatar.setManaged(false);
+        dialogBox.avatar.setVisible(false);
         dialogBox.getStyleClass().add("user-dialog");
         return dialogBox;
     }
@@ -66,6 +64,18 @@ public class DialogBox extends HBox {
         dialogBox.avatar.setImage(MEKA_IMAGE);
         dialogBox.flip();
         dialogBox.getStyleClass().add("meka-dialog");
+        return dialogBox;
+    }
+
+    /**
+     * Returns a left-aligned, emphasized dialog for an error reported by MEKA.
+     *
+     * @param text error message to display.
+     * @return error dialog box.
+     */
+    public static DialogBox getErrorDialog(String text) {
+        DialogBox dialogBox = getMekaDialog(text);
+        dialogBox.getStyleClass().add("error-dialog");
         return dialogBox;
     }
 

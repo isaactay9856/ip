@@ -54,9 +54,12 @@ public class MainWindow {
         }
 
         String response = meka.getResponse(input);
+        DialogBox responseDialog = meka.isLastResponseError()
+                ? DialogBox.getErrorDialog(response)
+                : DialogBox.getMekaDialog(response);
         dialogContainer.getChildren().addAll(
                 DialogBox.getUserDialog(input),
-                DialogBox.getMekaDialog(response));
+                responseDialog);
         userInput.clear();
 
         if (meka.isExitRequested()) {
