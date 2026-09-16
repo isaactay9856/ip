@@ -76,6 +76,8 @@ public class Parser {
     public static Command parse(String input) throws MekaException {
         assert input != null : "Command input should come from a user interface";
 
+        input = input.trim().replaceAll("[ \\t]+", " ");
+
         if (input.equals("bye")) {
             return new ExitCommand();
         }
@@ -145,6 +147,7 @@ public class Parser {
      * @throws MekaException if required task details are missing or invalid.
      */
     private static Task parseDeadline(String input) throws MekaException {
+        requireSingleMarker(input, "by");
         int byIndex = findArgumentMarker(input, "by");
         String description = byIndex < 0
                 ? parseDescription(input, "deadline")
@@ -167,6 +170,8 @@ public class Parser {
      * @throws MekaException if required task details are missing or invalid.
      */
     private static Task parseEvent(String input) throws MekaException {
+        requireSingleMarker(input, "from");
+        requireSingleMarker(input, "to");
         int fromIndex = findArgumentMarker(input, "from");
         int toIndex = fromIndex < 0
                 ? -1
@@ -183,7 +188,22 @@ public class Parser {
         String to = input.substring(toIndex + " /to".length()).trim();
         requireDateTime(from);
         requireDateTime(to);
-        return new Event(description, parseDateTime(from), parseDateTime(to));
+        LocalDateTime start = parseDateTime(from);
+        LocalDateTime end = parseDateTime(to);
+        if (!end.isAfter(start)) {
+            throw new MekaException("The event end must be after its start.");
+        }
+        return new Event(description, start, end);
+    }
+
+    /**
+     * Rejects repeated date parameters so no supplied value is silently ignored.
+     */
+    private static void requireSingleMarker(String input, String marker) throws MekaException {
+        int firstIndex = findArgumentMarker(input, marker);
+        if (firstIndex >= 0 && findArgumentMarker(input, marker, firstIndex + 1) >= 0) {
+            throw new MekaException("Specify /" + marker + " only once.");
+        }
     }
 
     /**

@@ -28,6 +28,41 @@ public class ParserTest {
     private Path directory;
 
     @Test
+    public void parse_repeatedParameters_rejectsAmbiguousValues() {
+        String[] inputs = {
+            "deadline report /by 2/12/2019 1800 /by 3/12/2019 1800",
+            "event meeting /from 2/12/2019 0900 /from 2/12/2019 1000 /to 2/12/2019 1100",
+            "event meeting /from 2/12/2019 0900 /to 2/12/2019 1000 /to 2/12/2019 1100"
+        };
+        String[] markers = {"by", "from", "to"};
+        for (int i = 0; i < inputs.length; i++) {
+            String input = inputs[i];
+            MekaException exception = assertThrows(MekaException.class, () -> Parser.parse(input));
+            assertEquals("Specify /" + markers[i] + " only once.", exception.getMessage());
+        }
+    }
+
+    @Test
+    public void parse_nonIncreasingEventTimes_rejectsInvalidRange() {
+        for (String end : new String[]{"0900", "0800"}) {
+            String input = "event meeting /from 2/12/2019 0900 /to 2/12/2019 " + end;
+            MekaException exception = assertThrows(MekaException.class, () -> Parser.parse(input));
+            assertEquals("The event end must be after its start.", exception.getMessage());
+        }
+    }
+
+    @Test
+    public void parse_extraWhitespace_acceptsCommandsAndDates() throws Exception {
+        TaskList tasks = new TaskList();
+        Storage storage = new Storage(directory.resolve("whitespace.txt"));
+        Parser.parse(" \tdeadline\t report   /by\t2/12/2019   1800  ")
+                .execute(tasks, new Ui(), storage);
+
+        assertEquals("D | 0 | report | 2019-12-02T18:00", tasks.get(1).toDataString());
+        assertInstanceOf(ListCommand.class, Parser.parse(" \tlist\t "));
+    }
+
+    @Test
     public void parse_supportedCommands_returnsExecutableCommands() throws Exception {
         assertInstanceOf(AddCommand.class, Parser.parse("todo read book"));
         assertInstanceOf(MarkCommand.class, Parser.parse("mark 1"));

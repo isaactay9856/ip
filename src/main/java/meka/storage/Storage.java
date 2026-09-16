@@ -73,7 +73,7 @@ public class Storage {
         if (!isAvailable) {
             throw new IOException("Task storage is unavailable");
         }
-        Files.createDirectories(filePath.getParent());
+        Files.createDirectories(filePath.toAbsolutePath().getParent());
 
         ArrayList<String> taskData = new ArrayList<>();
         for (Task task : tasks) {
@@ -175,8 +175,12 @@ public class Storage {
                     task = new Deadline(fields[2], LocalDateTime.parse(fields[3]));
                     break;
                 case "E":
-                    task = new Event(fields[2], LocalDateTime.parse(fields[3]),
-                            LocalDateTime.parse(fields[4]));
+                    LocalDateTime start = LocalDateTime.parse(fields[3]);
+                    LocalDateTime end = LocalDateTime.parse(fields[4]);
+                    if (!end.isAfter(start)) {
+                        throw invalidData(lineNumber, "event end must be after its start");
+                    }
+                    task = new Event(fields[2], start, end);
                     break;
                 default:
                     throw invalidData(lineNumber, "unknown task type");

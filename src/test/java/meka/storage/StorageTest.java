@@ -23,6 +23,20 @@ public class StorageTest {
     private Path directory;
 
     @Test
+    public void load_invalidEventRange_rejectsAndPreservesData() throws Exception {
+        Path file = directory.resolve("invalid-event.txt");
+        for (String end : new String[]{"2019-12-03T09:00", "2019-12-03T08:00"}) {
+            String content = "E | 0 | meeting | 2019-12-03T09:00 | " + end;
+            Files.writeString(file, content);
+
+            DataFileException exception = assertThrows(DataFileException.class, () -> new Storage(file).load());
+
+            assertEquals("Invalid data on line 1: event end must be after its start", exception.getMessage());
+            assertEquals(content, Files.readString(file));
+        }
+    }
+
+    @Test
     public void load_missingFile_returnsEmptyList() throws Exception {
         assertEquals(0, new Storage(directory.resolve("missing.txt")).load().size());
     }

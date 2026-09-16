@@ -20,6 +20,21 @@ class MekaTest {
     private Path temporaryDirectory;
 
     @Test
+    void getResponse_invalidEvent_preservesTasksAndRecovers() throws Exception {
+        Path file = temporaryDirectory.resolve("events.txt");
+        Meka meka = new Meka(file.toString());
+        meka.getResponse("todo existing task");
+        String saved = Files.readString(file);
+
+        assertEquals("The event end must be after its start.",
+                meka.getResponse("event meeting /from 2/12/2019 0900 /to 2/12/2019 0800"));
+        assertTrue(meka.isLastResponseError());
+        assertEquals(saved, Files.readString(file));
+        assertEquals("1. [T][ ] existing task", meka.getResponse("list"));
+        assertFalse(meka.isLastResponseError());
+    }
+
+    @Test
     void getResponse_validTodo_updatesSharedTaskList() {
         Meka meka = new Meka(temporaryDirectory.resolve("tasks.txt").toString());
 
