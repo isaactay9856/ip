@@ -167,6 +167,25 @@ public class Ui {
     }
 
     /**
+     * Shows confirmation that all active tasks were archived.
+     *
+     * @param archivedTaskCount number of tasks moved to the archive.
+     */
+    public void showTasksArchived(int archivedTaskCount) {
+        String taskLabel = archivedTaskCount == 1 ? "task" : "tasks";
+        printLines(
+                " Noted. I've archived all " + archivedTaskCount + " " + taskLabel + ".",
+                " Now you have 0 tasks in the list.");
+    }
+
+    /**
+     * Shows that there are no active tasks available to archive.
+     */
+    public void showNoTasksToArchive() {
+        output.println(" There are no tasks to archive.");
+    }
+
+    /**
      * Shows an error caused by an invalid command.
      *
      * @param message explanation to show the user.

@@ -110,4 +110,39 @@ public class StorageTest {
         assertTrue(Files.exists(file));
         assertEquals("", Files.readString(file));
     }
+
+    @Test
+    public void archiveAll_existingArchive_appendsInOrderAndClearsSavedTasks() throws Exception {
+        Path file = directory.resolve("meka.txt");
+        Path archiveFile = directory.resolve("meka-archive.txt");
+        Files.writeString(archiveFile, "T | 1 | earlier task\n");
+        Storage storage = new Storage(file);
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("duplicate task"));
+        tasks.add(new Todo("duplicate task"));
+        storage.save(tasks);
+
+        storage.archiveAll(tasks);
+
+        assertEquals(0, storage.load().size());
+        assertEquals("T | 1 | earlier task" + System.lineSeparator()
+                + "T | 0 | duplicate task" + System.lineSeparator()
+                + "T | 0 | duplicate task" + System.lineSeparator(), Files.readString(archiveFile));
+        assertEquals(2, tasks.size());
+    }
+
+    @Test
+    public void archiveAll_activeFileCannotBeCleared_rollsBackNewArchive() throws Exception {
+        Path activeDirectory = directory.resolve("tasks.txt");
+        Files.createDirectory(activeDirectory);
+        Path archiveFile = directory.resolve("tasks-archive.txt");
+        Storage storage = new Storage(activeDirectory);
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("preserved task"));
+
+        assertThrows(IOException.class, () -> storage.archiveAll(tasks));
+
+        assertEquals(false, Files.exists(archiveFile));
+        assertEquals(1, tasks.size());
+    }
 }

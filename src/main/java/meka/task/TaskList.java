@@ -76,6 +76,13 @@ public class TaskList implements Iterable<Task> {
     }
 
     /**
+     * Removes every task from the list.
+     */
+    public void clear() {
+        tasks.clear();
+    }
+
+    /**
      * Returns the number of tasks in the list.
      *
      * @return current task count.

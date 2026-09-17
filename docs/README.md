@@ -153,6 +153,33 @@ For the example list, this removes `submit report` and leaves two tasks.
 Later tasks move up a number, so the meeting becomes task 2. There is no undo;
 you can add a deleted task again if needed.
 
+### Archive all tasks
+
+Use `archive all` to move every active task into `data/meka-archive.txt`
+and start again with an empty task list.
+
+Example:
+
+```text
+archive all
+```
+
+MEKA confirms how many tasks were archived:
+
+```text
+Noted. I've archived all 3 tasks.
+Now you have 0 tasks in the list.
+```
+
+If the active task list is empty, MEKA responds:
+
+```text
+There are no tasks to archive.
+```
+
+Archived tasks remain in `data/meka-archive.txt` as a permanent record.
+MEKA does not support viewing, restoring, or deleting archive entries.
+
 ### Exit
 
 Use `bye` to display a farewell and close MEKA after a short delay. You do not
@@ -164,7 +191,8 @@ MEKA saves changes to `data/meka.txt`, relative to the folder from which you
 launch it, and loads that file on startup. A missing file starts a new empty
 list; the file and its parent folder are created on the next successful save.
 
-To back up your tasks, close MEKA and copy `data/meka.txt` somewhere safe. Keep
+To back up your tasks, close MEKA and copy both `data/meka.txt` and
+`data/meka-archive.txt` (if present) somewhere safe. Keep
 the `data` folder with your working folder when moving to another location.
 
 If the file is unreadable or contains invalid data, MEKA starts with an empty
@@ -207,4 +235,5 @@ command and send it again; GUI errors appear in a red highlighted reply.
 | Mark incomplete | `unmark NUMBER` |
 | Find by description | `find KEYWORD` |
 | Delete a task | `delete NUMBER` |
+| Archive all active tasks | `archive all` |
 | Exit | `bye` |

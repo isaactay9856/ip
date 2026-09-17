@@ -7,6 +7,7 @@ This file records console UI test cases for the project. Run test cases in the l
 - **Compile command:** `./gradlew classes` using Java 25 in PowerShell
 - **Run command:** `java -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -cp build/classes/java/main meka.Meka` using Java 25
 - **Comparison rules:** Exact text comparison, normalizing only CRLF/LF line endings unless stated otherwise.
+- **Archive setup:** Before UI-11, use an empty archive path at `data/meka-archive.txt`. Preserve and restore any existing archive after testing. Compare its expected contents using the same file comparison rules.
 - **Other setup:** Before each test, remove the `data/meka.txt` file or directory if it exists. If a test specifies a pre-test data file, copy that fixture to `data/meka.txt` before launching the program. If a test specifies an unavailable data path, create a directory at `data/meka.txt`. Capture standard output as UTF-8.
 - **File comparison rules:** When a test specifies expected file content, compare `data/meka.txt` exactly after normalizing only CRLF/LF line endings and allowing the final newline written by `Files.write`.
 
@@ -602,4 +603,65 @@ ____________________________________________________________
 
 ```text
 T | 0 | read book
+```
+
+### UI-11: Archive all active tasks
+
+- **Aim:** Verify that `archive all` preserves every task in order, clears the active list, and reports an empty list on a second archive attempt.
+- **Inputs (in order):**
+
+```text
+todo first task
+deadline second task /by 14/9/2026 1800
+archive all
+list
+archive all
+bye
+```
+
+- **Expected output:**
+
+```text
+____________________________________________________________
+███╗   ███╗███████╗██╗  ██╗ █████╗
+████╗ ████║██╔════╝██║ ██╔╝██╔══██╗
+██╔████╔██║█████╗  █████╔╝ ███████║
+██║╚██╔╝██║██╔══╝  ██╔═██╗ ██╔══██║
+██║ ╚═╝ ██║███████╗██║  ██╗██║  ██║
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
+
+ Hello! I'm MEKA.
+ What can I do for you?
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] first task
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [D][ ] second task (by: Sep 14 2026, 6:00 PM)
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Noted. I've archived all 2 tasks.
+ Now you have 0 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+____________________________________________________________
+____________________________________________________________
+ There are no tasks to archive.
+____________________________________________________________
+____________________________________________________________
+ Bye. Hope to see you again soon!
+____________________________________________________________
+```
+
+- **Expected `data/meka.txt`:** Empty file.
+
+- **Expected `data/meka-archive.txt`:**
+
+```text
+T | 0 | first task
+D | 0 | second task | 2026-09-14T18:00
 ```
