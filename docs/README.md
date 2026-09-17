@@ -1,8 +1,9 @@
 # MEKA User Guide
 
 MEKA is a desktop task chatbot that helps you keep track of todos, deadlines,
-and events. Type commands to organize your tasks, find them, and mark them done.
-Your tasks are saved automatically when storage is available.
+and events. Type commands to organize your tasks, find them, mark them done,
+and archive the active list when you want a clean slate. Your tasks are saved
+automatically when storage is available.
 
 ## Quick start
 
@@ -18,7 +19,9 @@ Your tasks are saved automatically when storage is available.
    ```
 
 4. In the MEKA window, type `todo read book` and press **Enter** or click **Send**.
-5. Type `list` to see your task. Try `mark 1` to complete it, then `bye` to exit.
+5. Type `list` to see your task. Try `mark 1` to complete it.
+6. Type `archive all` to move the active list into the archive, or type `bye`
+   to exit without archiving.
 
 Always launch MEKA from the same folder so it can find your saved tasks.
 
@@ -156,7 +159,8 @@ you can add a deleted task again if needed.
 ### Archive all tasks
 
 Use `archive all` to move every active task into `data/meka-archive.txt`
-and start again with an empty task list.
+and start again with an empty active task list. This archives incomplete and
+completed tasks alike.
 
 Example:
 
@@ -177,8 +181,14 @@ If the active task list is empty, MEKA responds:
 There are no tasks to archive.
 ```
 
-Archived tasks remain in `data/meka-archive.txt` as a permanent record.
-MEKA does not support viewing, restoring, or deleting archive entries.
+MEKA appends tasks in their current list order and preserves each task's type,
+description, date-time details, and completion state. Existing archive entries
+are kept, so running `archive all` again adds another batch below them.
+
+Archived tasks remain in `data/meka-archive.txt` as a permanent record. They no
+longer appear in `list` or `find`, and MEKA does not support viewing, restoring,
+or deleting archive entries from within the app. You can inspect or back up the
+archive file using your file manager or a text editor.
 
 ### Exit
 
@@ -187,9 +197,16 @@ need a separate save command.
 
 ## Saving and recovering tasks
 
-MEKA saves changes to `data/meka.txt`, relative to the folder from which you
-launch it, and loads that file on startup. A missing file starts a new empty
-list; the file and its parent folder are created on the next successful save.
+MEKA uses the following files relative to the folder from which you launch it:
+
+| File | Purpose |
+| --- | --- |
+| `data/meka.txt` | Current active tasks; loaded whenever MEKA starts |
+| `data/meka-archive.txt` | Tasks moved by `archive all`; not loaded into the app |
+
+A missing active-task file starts a new empty list. The `data` folder and the
+required file are created on the next successful save. The archive file is
+created the first time a non-empty list is archived.
 
 To back up your tasks, close MEKA and copy both `data/meka.txt` and
 `data/meka-archive.txt` (if present) somewhere safe. Keep
@@ -200,11 +217,15 @@ in-memory list and prevents saving over the original file. The console shows
 a startup warning; the GUI currently does not show that warning.
 
 If you see **"I could not save the task list. Your changes are available only
-for this session."**, the change still exists in the open app, but it will not
-survive a restart. Further changes in that session will also remain unsaved.
-Record any tasks you need before closing MEKA, back up the existing data file,
-check that `data/meka.txt` is a writable file rather than a directory, and
-restore a known-good backup if needed. Restart MEKA after resolving the issue.
+for this session."**, MEKA has disabled storage for the rest of that session.
+An add, delete, mark, or unmark change remains in the open app but will not
+survive a restart. A failed `archive all` leaves the active tasks in the app. If
+the archive was written but the active file could not be cleared, MEKA attempts
+to restore the archive file to its previous contents.
+
+Record any tasks you need before closing MEKA, back up the existing data files,
+check that the paths are writable files rather than directories, and restore a
+known-good backup if needed. Restart MEKA after resolving the issue.
 
 ## Troubleshooting
 
@@ -218,6 +239,7 @@ restore a known-good backup if needed. Restart MEKA after resolving the issue.
 | Event end must be after its start | Enter an end date/time strictly later than the start. |
 | Task details contain a reserved delimiter | Remove any pipe character surrounded by spaces from the text. That sequence is reserved for saved data. |
 | Tasks seem to be missing | Check that you launched from the usual folder and that its `data/meka.txt` is intact. See recovery guidance above. |
+| Archived tasks are not shown by `list` | This is expected. Open `data/meka-archive.txt` directly; archived tasks cannot currently be restored inside MEKA. |
 | MEKA does not launch | Check `java -version` reports Java 25 and that the JAR filename and terminal folder are correct. |
 
 Command validation errors leave your existing tasks unchanged. Correct the

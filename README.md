@@ -2,8 +2,9 @@
 
 MEKA is a JavaFX task chatbot written in Java. It keeps track of todos,
 deadlines, and events, remembers whether tasks are complete, and restores saved
-tasks the next time it starts. The original console interface remains available
-for automated testing.
+tasks the next time it starts. It can also archive the entire active task list
+when the user wants a clean slate. The original console interface remains
+available for automated testing.
 
 ### Level 10: Graphical user interface
 
@@ -93,6 +94,9 @@ Tasks are saved automatically to `data/meka.txt` after a successful change.
 The file records each task's type, completion state, description, and any ISO
 date-time values. MEKA loads these tasks automatically on its next run.
 
+Archived tasks are stored separately in `data/meka-archive.txt` and are not
+loaded back into the active task list.
+
 ### Level 8: Date and time
 
 Deadline and event values are stored as `java.time.LocalDateTime`, not plain
@@ -127,6 +131,28 @@ Here are the matching tasks in your list:
 2. [D][X] return book (by: Jun 06 2019, 6:00 PM)
 ```
 
+### Extension: Archive all tasks
+
+Move every active task into a separate archive and start with an empty active
+list:
+
+```text
+archive all
+```
+
+MEKA appends the tasks to `data/meka-archive.txt` in their current order,
+including each task's completion state. It then clears `data/meka.txt` and
+reports how many tasks were archived:
+
+```text
+Noted. I've archived all 3 tasks.
+Now you have 0 tasks in the list.
+```
+
+If there are no active tasks, MEKA reports `There are no tasks to archive.`
+Archived entries are retained as records; the app does not currently provide
+commands to list, restore, or delete them.
+
 ## Command summary
 
 | Command | Purpose |
@@ -139,6 +165,7 @@ Here are the matching tasks in your list:
 | `mark NUMBER` | Mark a task as complete |
 | `unmark NUMBER` | Mark a task as incomplete |
 | `delete NUMBER` | Delete a task |
+| `archive all` | Archive every active task and clear the active list |
 | `bye` | Exit MEKA |
 
 For deadline and event commands, replace `DATE_TIME` with a value such as
@@ -176,3 +203,6 @@ run `meka.Meka` directly from IntelliJ IDEA.
 ./gradlew shadowJar
 java -jar build/libs/meka.jar
 ```
+
+See the [MEKA User Guide](docs/README.md) for complete command examples,
+validation rules, archive behavior, and recovery guidance.
