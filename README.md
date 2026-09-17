@@ -206,3 +206,7 @@ java -jar build/libs/meka.jar
 
 See the [MEKA User Guide](docs/README.md) for complete command examples,
 validation rules, archive behavior, and recovery guidance.
+
+## Acknowledgements
+
+Isaac Tay ([@isaactay9856](https://github.com/isaactay9856)) used OpenAI Codex to assist with MEKA's development, which includes code review and test verification.
